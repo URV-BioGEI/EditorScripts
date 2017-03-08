@@ -1,0 +1,153 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from Tkinter import *
+import tkFileDialog
+import ScrolledText as tkst
+#MAIN
+#Paràmetres de finestra principal
+mainw=Tk()
+mainw.title("Execució d'Scripts en el temps")
+#mainw.minsize(600, 700)
+
+#Elements main window
+f1=Frame(mainw, bg="grey")
+f1.pack(fill=X, side=TOP)
+
+b1=Button(f1,text='Escollir directori de treball',command=tkFileDialog.askdirectory)
+b1.pack(side=LEFT)
+
+l1=Label(f1,text="(No sóc un label) aixo mostra directori actual")
+l1.pack(expand=TRUE, fill=X, side=RIGHT, anchor=W)
+
+f2=Frame(mainw)
+f2.pack(side=TOP, fill=X)
+
+def ObrirScript():
+	print "Falta la funció obrir Script"
+
+b2=Button(f2, text="Obrir Script", command=ObrirScript)
+b2.pack(side=LEFT)
+
+e1=Entry(f2,width=20)
+e1.pack(expand=TRUE, fill=X, side=LEFT)
+
+def GuardarScript():
+	print "Falta la funció guardar Script"
+
+b3=Button(f2, text="Guardar l'Script", command=GuardarScript)
+b3.pack(side=RIGHT)
+
+def GuardarNouScript():
+	print "Falta la funció guardar nou Script"
+
+b4=Button(mainw, text="Guardar en un nou script", command=GuardarNouScript)
+b4.pack(side=TOP, anchor=W)
+
+
+st=tkst.ScrolledText(
+    master = mainw,
+    wrap   = 'word',  # wrap text at full words only
+    width  = 25,      # characters
+    height = 17,      # text lines
+    bg='beige'        # background color of edit area
+)
+st.pack(fill=X, side=TOP, padx=8, pady=8)
+
+f3=Frame(mainw)
+f3.pack(side=TOP, fill=X)
+
+l2=Label(f3, text="Arguments d'entrada :")
+l2.pack(side=LEFT)
+
+e1=Entry(f3, text="pepito")
+e1.pack(expand=TRUE, fill=X, side=LEFT)
+
+cb1=Checkbutton(f3, text="Genera Stdout")
+cb1.pack(side=LEFT)
+
+cb2=Checkbutton(f3, text="Genera Stderr")
+cb2.pack(side=LEFT)
+
+f4=Frame(mainw)
+f4.pack(side=TOP, fill=X)
+
+def VeureStderr():
+	print "Falta la funció VeureStderr"
+
+b5=Button(f4, text="Veure Stderr", command=VeureStderr)
+b5.pack(side=RIGHT)
+
+def VeureStout():
+	print "Falta la funció VeureStout"
+
+b6=Button(f4, text="Veure Stdout", command=VeureStout)
+b6.pack(side=RIGHT)
+
+f5=Frame(mainw)
+f5.pack(side=TOP, fill=X)
+
+def RunNow():
+	print "Falta la funció Runnow"
+
+b5=Button(f5, text="Run", command=RunNow)
+b5.pack(side=RIGHT)
+
+l3=Label(f5, text="Executa immediatament")
+l3.pack(side=RIGHT)
+
+f6=Frame(mainw)
+f6.pack(side=TOP, fill=X)
+
+def RunLate():
+	print "Falta la funció RunLate"
+
+b6=Button(f6, text="Run", command=RunLate)
+b6.pack(side=RIGHT)
+
+l4=Label(f6, text="  HH:MM  ")
+l4.pack(side=RIGHT)
+
+e2=Entry(f6, width=3)
+e2.pack(side=RIGHT)
+
+l5=Label(f6, text=":")
+l5.pack(side=RIGHT)
+
+e3=Entry(f6, width=3)
+e3.pack(side=RIGHT)
+
+l6=Label(f6, text="Executa un cop a les ")
+l6.pack(side=RIGHT)
+
+f7=Frame(mainw)
+f7.pack(side=TOP, fill=X)
+
+def RunHour():
+	print "Falta la funció RunHour"
+
+b7=Button(f7, text="Run", command=RunHour)
+b7.pack(side=RIGHT)
+
+l7=Label(f7, text="  HH:MM  ")
+l7.pack(side=RIGHT)
+
+e4=Entry(f7, width=3)
+e4.pack(side=RIGHT)
+
+l8=Label(f7, text=":")
+l8.pack(side=RIGHT)
+
+e5=Entry(f7, width=3)
+e5.pack(side=RIGHT)
+
+l9=Label(f7, text="Programa cada dia a les ")
+l9.pack(side=RIGHT)
+
+f8=Frame(mainw)
+f8.pack(side=TOP, fill=X)
+
+b8=Button(f8, text="Sortir", command=mainw.quit)
+b8.pack(side=LEFT)
+
+mainw.mainloop()
