@@ -28,12 +28,16 @@ f2.pack(side=TOP, fill=X) #aliniem a la part de dalt i li permetem expandir-se
 # S'encarrega d'obrir l'Script a partir del nom (Entry e1) 
 # i de la ruta escollida (Label l1) 
 # i mostrar el contingut en el ScrolledText st
-# Cal implementar el cas de que el fitxer no existeixi o no tingui l'extensió py (?)
+# Cal implementar el cas de que el fitxer no existeixi o no tingui l'extensió sh (?)
 # Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
 # Si pot executar-se o no. (si hem obert algun script amb anterioritat)
 def ObrirScript():
-	print "Falta la funció obrir Script"
-
+	file=e1.get()
+	f=open(file, 'r')
+	content=f.read()
+	f.close()
+	st.text=content
+	
 b2=Button(f2, text="Obrir Script", command=ObrirScript) #botó per a obrir script
 b2.pack(side=LEFT) #l'apilem a l'esquerra
 
