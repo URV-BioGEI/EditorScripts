@@ -1,24 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import tkMessageBox # Per a mostrar els dialegs
 from Tkinter import *
 import tkFileDialog
 import ScrolledText as tkst
+import os 	#Importem el modul del sistema per a utilitzar comandes de la shell
 #MAIN
 #Paràmetres de finestra principal
 mainw=Tk()
 mainw.title("Execució d'Scripts en el temps")
-#mainw.minsize(600, 700)
-
 #Elements main window
-
+#{
 f1=Frame(mainw, bg="grey")	#Creem primer frame, li donem el color gris
 f1.pack(fill=X, side=TOP)	#aliniem a la part de dalt i li permetem expandir-se en X
-#{
-b1=Button(f1,text='Escollir directori de treball',command=tkFileDialog.askdirectory)	#Creem el botó i li assignem la comanda de preguntar el directori
+
+def EscullDirectori():
+	global directori
+	directori=tkFileDialog.askdirectory(
+		parent=mainw,	# Fa que la nova finestra sigui pare de la finestra principal 
+		title="Escollir directori", #Títol de la finestra
+		mustexist=TRUE )	#El directori ha d'existir
+	l1.configure(text=directori)
+
+b1=Button(f1,text='Escollir directori de treball',command=EscullDirectori)	#Creem el botó i li assignem la comanda de preguntar el directori
 b1.pack(side=LEFT)	 #l'apilem a l'esquerra
 
-l1=Label(f1,text="(No sóc un label) aixo mostra directori actual")	#"label" que mostra el directori actual
+l1=Label(f1,text="")	#"label" que mostra el directori actual
 l1.pack(expand=TRUE, fill=X, side=RIGHT, anchor=W)	#Li permeten exapndre's al llarg de la finestra en X, l'apilem a la dreta 
 #}
 f2=Frame(mainw) #Creem primer frame,
@@ -32,12 +39,17 @@ f2.pack(side=TOP, fill=X) #aliniem a la part de dalt i li permetem expandir-se
 # Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
 # Si pot executar-se o no. (si hem obert algun script amb anterioritat)
 def ObrirScript():
-	file=e1.get()
-	f=open(file, 'r')
-	content=f.read()
-	f.close()
-	st.text=content
-	
+	file=e1.get()	# Obtenim el nom del fitxer del entry box
+	try:
+		f=open(file, 'r')	# Obrim el fitxer indicat per l'usuari
+		global content		# Globalitzem la variable per a ser disponible al main
+		content=f.read()	# Llegim tot el fitxer i l'emmagatzemem
+		f.close()			# Tanquem el fitxer
+		st.delete(1.0,END)	# Fem un clean del text
+		st.insert(END, content)	# Insertem el contingut del fitxer
+	except IOError:
+		tkMessageBox.showerror(title="Error I/O", message="El fitxer indicat no existeix")	# Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+
 b2=Button(f2, text="Obrir Script", command=ObrirScript) #botó per a obrir script
 b2.pack(side=LEFT) #l'apilem a l'esquerra
 
@@ -122,7 +134,11 @@ f5.pack(side=TOP, fill=X) #apilem a dalt i permetem l'expansió
 # Executa l’script escollit amb els arguments i redireccions
 # indicades de manera immediata.
 def RunNow():
-	print "Falta la funció Runnow"
+	s=st.get(1.0, END)
+	f=open('/tmp/tmp.sh','w')
+	f.write(s)
+	os.system("chmod +x /tmp/tmp.sh")
+	os.system("/tmp/tmp.sh")
 
 b5=Button(f5, text="Run", command=RunNow)	#Executa la funció de dalt
 b5.pack(side=RIGHT)		# apilem a la dreta
