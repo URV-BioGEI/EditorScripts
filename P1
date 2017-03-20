@@ -5,14 +5,23 @@ from Tkinter import *
 import tkFileDialog
 import ScrolledText as tkst
 import os 	#Importem el modul del sistema per a utilitzar comandes de la shell
+import subprocess
+from subprocess import Popen, PIPE
+import sys
 #MAIN
 #Paràmetres de finestra principal
 mainw=Tk()
 mainw.title("Execució d'Scripts en el temps")
 
 #Var
-global carregat		#Exportem a global
-carregat=0			#Buleà per a saber ssi hem carregat fitxer
+	# nomf						nom del fitxer obert
+file = 0						# ruta al fitxer  (inclou nom)
+carregat = 0					# Flag: Indica si s'ha carregat un fitxer
+directori = 0					# directori de treball actual
+nomf = 0						# Nom del fitxer obert
+stdouttxt = ""					# String amb stdout
+stderrtxt = ""					# String amb stderr
+	# 
 #Elements main window
 #{
 f1=Frame(mainw, bg="grey")	#Creem primer frame, li donem el color gris
@@ -24,7 +33,8 @@ def EscullDirectori():
 		parent=mainw,	# Fa que la nova finestra sigui pare de la finestra principal 
 		title="Escollir directori", #Títol de la finestra
 		mustexist=TRUE )	#El directori ha d'existir
-	l1.configure(text=directori)
+	l1.configure(text=directori) # Assignem el directori al label
+	global directoritriat
 
 b1=Button(f1,text='Escollir directori de treball',command=EscullDirectori)	#Creem el botó i li assignem la comanda de preguntar el directori
 b1.pack(side=LEFT)	 #l'apilem a l'esquerra
@@ -43,17 +53,25 @@ f2.pack(side=TOP, fill=X) #aliniem a la part de dalt i li permetem expandir-se
 # Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
 # Si pot executar-se o no. (si hem obert algun script amb anterioritat)
 def ObrirScript():
-	global file 		# Fem la variable fitxer global
-	file=tkFileDialog.askopenfile(mode='a+', title="Obrir fitxer", filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
-	try:
-		global carregat		# Creen la variable buleana carregat i la fem global (comunicació)
-		global content		# Globalitzem la variable per a ser disponible al main
-		content=file.read()	# Llegim tot el fitxer i l'emmagatzemem
-		st.delete(1.0,END)	# Fem un clean del text
-		st.insert(END, content)	# Insertem el contingut del fitxer
-		carregat = 1 			#Indiquem que hem carregat un fitxer
-	except IOError:
-		tkMessageBox.showerror(title="Error I/O", message="El fitxer indicat no existeix")	# Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+	if directori !=0: # Entrem si l'usuari ja ha triat directori
+		global file # Fem la variable fitxer global per a modificar-la
+		file=tkFileDialog.askopenfilename(initialdir=directori, title="Obrir fitxer", filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
+		if file:									# Si no escollim cap fitxer, llavors no entrem al if
+			try:
+				global nomf							# Accedim a la memoria global
+				nomf = os.path.basename(file)		# Obtenim el nom del fitxer
+				e1.delete(0, END)					# Borrem el contingut de l'entry
+				e1.insert(0, nomf)					# I li assiggnem el nom del fitxer
+				f = open (file, 'r')				# Obrir fitxer, en mode lectura
+				content=f.read()					# Llegim tot el fitxer i l'emmagatzemem
+				st.delete(1.0,END)					# Fem un clean del text
+				st.insert(END, content)				# Insertem el contingut del fitxer
+				f.close()							# Tanquem el fitxer
+			except IOError:
+				tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
+	else:
+		tkMessageBox.showerror(title="Error", message="Error: Primer cal triar un directori de treball!")	# Si captem una excepció E/S mostrem el missatge
+
 
 b2=Button(f2, text="Obrir Script", command=ObrirScript) #botó per a obrir script
 b2.pack(side=LEFT) #l'apilem a l'esquerra
@@ -64,11 +82,15 @@ e1.pack(expand=TRUE, fill=X, side=LEFT)	# li permetem expandir-se en X i l'apile
 # S'encarrega d'agafar el contingut del ScrolledText st i passar-lo al fitxer que ja ha sigut obert obert
 # Per a executar-se un fitxer ha hagut de ser obert prèviament
 def GuardarScript():
-	if carregat==1:
-		file.truncate(0)		#Netegem el fitxer
-		deb=st.get(1.0, END)
-		file.write(deb)
-	else:
+	if file!=0:					# Si el flag no es troba actiu...
+		try:
+			f = open(file, 'w+')		# Obrim el fitxer en mode escriptura +, farà clean abans
+			text = st.get(1.0, END)		# Obtenim el text del text box
+			f.write(text)				# Guardem el text al fitxer
+			f.close()					# Tanquem fitxer
+		except IOError:
+			tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
+	else:								# ...Mostrem missatge d'error
 		tkMessageBox.showerror(title="Error I/O", message="Per a guardar cal carregar un fitxer abans")	# Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
 
 
@@ -78,7 +100,32 @@ b3.pack(side=RIGHT)	#L'apilem a la dreta
 #Genera un nou script amb el nom indicat a l'Entry e1 en el directori que indica label l1
 #Cal fer dues excepcions si no hi han valors o bé el string de nom de fitxer es incorrecte
 def GuardarNouScript():
-	print cosas
+	borrar=1									# Activem flag de borrar
+	if directori !=0:							# Entrem si l'usuari ja ha triat directori
+		try:
+			nomf = e1.get()						# Obtenim nom de fitxer triat per l'usuari
+			if nomf:							# Si ha introduit un nom procedim, sino...
+				if not nomf.endswith('.sh'):	# Si el nom de fitxer no acaba amb .sh
+					nomf = nomf + ".sh"			# L'afegim nosaltres
+				path = directori + "/" + nomf	# Creem el path de fitxer, juntant directori actual amb nom de fitxer
+				if os.path.isfile(path):		# Mirem si ja existeix, i si ho fa mostrem opció per a sobreeescriure o no
+					result = tkMessageBox.askquestion(title="Atenció", message="El fitxer ja existeix, estàs segur que vols sobreescriure'l?", icon='warning')
+					if result=='no':			
+						borrar = 0				# Si no vol sobreeescriure baixem el flag
+				if borrar == 1:					# Si ha premut si el flag segueix pujat i entrem al if
+					f = open (path, 'w+')		# Obrim el fitxer en mode w+ per si no existeix, llavors es crearà, sino farà un clean
+					#f.truncate(0)				# Netegem el fitxer
+					text = st.get(1.0, END)		# Obtenim el text del text box
+					f.write(text)				# Guardem el text al fitxer
+					f.close()					# Tanquem fitxer
+			else:								# Mostrem l'error
+				tkMessageBox.showerror(title="Error", message="Per a guardar cal triar un nom de fitxer")	# Si captem una excepció E/S mostrem el missatge
+		except IOError:
+			tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
+	else:
+		tkMessageBox.showerror(title="Error I/O", message="Per a guardar cal triar un directori de treball")	# Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+
+
 
 b4=Button(mainw, text="Guardar en un nou script", command=GuardarNouScript)	#Botó per a generar la funció de dalt
 b4.pack(side=TOP, anchor=W) #l'apilem a la part de dalt del frame on ens trobem
@@ -109,14 +156,15 @@ e2.pack(expand=TRUE, fill=X, side=LEFT) # l'apilem i li permeten fer-se gran
 # Permet redireccionar la sortida de l'execució de l’script a un fitxer.
 # El nom d’aquest fitxer serà en nom de l’script amb extensió «.out»
 # Sera consultat per tots els botons run
-cb1=Checkbutton(f3, text="Genera Stdout")	# checkbox per a saber si cal generar stdout en un fitxer
+std1 = IntVar()
+cb1=Checkbutton(f3, text="Genera Stdout", variable=std1)	# checkbox per a saber si cal generar stdout en un fitxer
 cb1.pack(side=LEFT)
 
 # Permet redireccionar la sortida d’error de l'execució de l’script a un
 # fitxer. El nom d’aquest fitxer serà en nom de l’script amb extensió «.err»
 # Sera consultat per tots els botons run
-
-cb2=Checkbutton(f3, text="Genera Stderr") 	# checkbox per a saber si cal generar stderr en un fitxer
+std2 = IntVar()
+cb2=Checkbutton(f3, text="Genera Stderr", variable=std2) 	# checkbox per a saber si cal generar stderr en un fitxer
 cb2.pack(side=LEFT)
 #}
 #{
@@ -134,7 +182,22 @@ b5.pack(side=RIGHT)		# Ho apilem a la part dreta
 # Crea una subfinestra per a visualitzar si existeix la sortida de la
 # darrera execució de l’script.
 def VeureStdout():
-	print "Falta la funció VeureStout"
+	global stout
+	fout=Tk()
+	fout.title("Sortida estandard Script")
+	stout=tkst.ScrolledText(
+	master = fout,	  # incloem a la finestra fout aquest objecte
+	wrap   = 'word',  # Fem que el text sigui de paraules (?)
+   	width  = 60,      # carácters per fila
+	height = 12,      # linies de text
+	bg='beige'        # color de fons
+	)
+	stout.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8, pady=8)
+	stout.delete(1.0, END)					# Fem un clean del text
+	stout.insert(END, stdouttxt)				# Insertem el contingut del stdout
+	b9=Button(fout, text="Ok", command=None)		# Falta com tancar la finestra
+	b9.pack(side=RIGHT)	# Si apretem aquest botó tanquem la finestra
+	fout.mainloop()
 
 b6=Button(f4, text="Veure Stdout", command=VeureStdout) # Botó que executa la funció de dalt.
 b6.pack(side=RIGHT) # Apilem a la dreta
@@ -145,11 +208,29 @@ f5.pack(side=TOP, fill=X) #apilem a dalt i permetem l'expansió
 # Executa l’script escollit amb els arguments i redireccions
 # indicades de manera immediata.
 def RunNow():
-	s=st.get(1.0, END)
-	f=open('/tmp/tmp.sh','w')
-	f.write(s)
-	os.system("chmod +x /tmp/tmp.sh")
-	os.system("/tmp/tmp.sh")
+	global st, stdouttxt, stderrtxt						# Accedim a variables globals
+	ubicacio="/tmp/tmp.sh"								# Assignem la ubicació del fitxer temporal script
+	arguments = ubicacio + " " +e2.get()				# Obtenim els arguments (executar script i passar arguments)
+	com = st.get(1.0, END)								# Obtenim el text del fitxer 
+	f = open(ubicacio, 'w+')							# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+	f.write(com)										# Escrivim el script
+	f.close()											# Tanquem el fitxer
+	os.system("chmod +x /tmp/tmp.sh")					# Donem permisos d'execució
+	rc = subprocess.Popen(								# Cridem al modul subprocess
+	arguments, 											# Li passem les comandes (execució + parametres)
+	shell=True,											# Pel tipus de crida aquest ha de ser true
+	stdout=PIPE,										# Per a poder obtenir stdout
+	stderr=PIPE)										# Per a poder obtenir stderr	
+	stdouttxt, stderrtxt = rc.communicate()				# Obtenim les sortides
+# Part opcional dels checkboxes
+	if std1.get():										# Si l'usuari ha marcat el checkbox del stdout...							
+		f = open ("tmp.out", 'w+')						# Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
+		f.write(stdouttxt)								# Hi escrivim la sortida
+		f.close()										# Tanquem
+	if std2.get():										# Si l'usuari ha marcat el checkbox del stderr...
+		f = open ("tmp.err", 'w+')						# Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
+		f.write(stderrtxt)								# Hi escrivim la sortida
+		f.close()										# Tanquem					
 
 b5=Button(f5, text="Run", command=RunNow)	#Executa la funció de dalt
 b5.pack(side=RIGHT)		# apilem a la dreta
@@ -218,8 +299,7 @@ f8=Frame(mainw)		# frame per al botó de sortida
 f8.pack(side=TOP, fill=X) # Apilem a la esquerra i permetem l'expansió X
 
 def Sortir():
-	file.close()
-	mainw.quit
+	mainw.quit()
 
 b8=Button(f8, text="Sortir", command=Sortir)	# Si apretem aquest botó tanquem la finestra
 b8.pack(side=LEFT) # Apilem a la esquerra
