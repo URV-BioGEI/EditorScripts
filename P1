@@ -163,6 +163,7 @@ st=tkst.ScrolledText(
     height = 17,      # linies de text
     bg='beige'        # color de fons
 )
+
 st.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8, pady=8)	#Apilem i permetem l'expansió. Els altres valors son la mida del text (?)
 #}
 #{
@@ -203,24 +204,6 @@ b5.pack(side=RIGHT)		# Ho apilem a la part dreta
 
 # Crea una subfinestra per a visualitzar si existeix la sortida de la
 # darrera execució de l’script.
-def VeureStdout_v1():
-	global stout
-	fout=Tk()
-	fout.title("Sortida estandard Script")
-	stout=tkst.ScrolledText(
-	master = fout,	  # incloem a la finestra fout aquest objecte
-	wrap   = 'word',  # Fem que el text sigui de paraules (?)
-   	width  = 60,      # carácters per fila
-	height = 12,      # linies de text
-	bg='beige'        # color de fons
-	)
-	stout.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8, pady=8)
-	stout.delete(1.0, END)					# Fem un clean del text
-	stout.insert(END, stdouttxt)				# Insertem el contingut del stdout
-	b9=Button(fout, text="Ok", command=None)		# Falta com tancar la finestra
-	b9.pack(side=RIGHT)	# Si apretem aquest botó tanquem la finestra
-	fout.mainloop()
-
 def VeureStdout():
     # global stout
     d = MyDialog(mainw, stdouttxt)
