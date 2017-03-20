@@ -8,6 +8,7 @@ import os 	#Importem el modul del sistema per a utilitzar comandes de la shell
 import subprocess
 from subprocess import Popen, PIPE
 import sys
+import time
 #MAIN
 #Paràmetres de finestra principal
 
@@ -254,24 +255,52 @@ f6.pack(side=TOP, fill=X)	# apilem a dalt i permetem l'expansió X
 # hora i minut determinats. Caldrà buscar informació sobre la comanda
 # Obtenim el temps en el format HH:MM -> e4:e3
 def RunLate():
-	print "Falta la funció RunLate"
+    global st, stdouttxt, stderrtxt  # Accedim a variables globals
+    try:
+        segons = int(e4.get())
+        if(segons < 0):
+            tkMessageBox.showerror(title="Error en els segons.",
+                                   message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        else:
+            ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
+            arguments = "sleep " + str(segons) + " && " + ubicacio + " " + e2.get() + " &" # Obtenim els arguments (executar script i passar arguments)
+            com = st.get(1.0, END)  # Obtenim el text del fitxer
+            f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+            f.write(com)  # Escrivim el script
+            f.close()  # Tanquem el fitxer
+            os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
+            rc = subprocess.Popen(  # Cridem al modul subprocess
+                arguments,  # Li passem les comandes (execució + parametres)
+                shell=True,  # Pel tipus de crida aquest ha de ser true
+                stdout=PIPE,  # Per a poder obtenir stdout
+                stderr=PIPE)  # Per a poder obtenir stderr
+            stdouttxt, stderrtxt = rc.communicate()  # Obtenim les sortides
+            # Part opcional dels checkboxes
+            if std1.get():  # Si l'usuari ha marcat el checkbox del stdout...
+                f = open("tmp.out",
+                         'w+')  # Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
+                f.write(stdouttxt)  # Hi escrivim la sortida
+                f.close()  # Tanquem
+            if std2.get():  # Si l'usuari ha marcat el checkbox del stderr...
+                f = open("tmp.err",
+                         'w+')  # Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
+                f.write(stderrtxt)  # Hi escrivim la sortida
+                f.close()  # Tanquem
+    except Exception as e:
+        tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+
+
 
 b6=Button(f6, text="Run", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
 
-l4=Label(f6, text="  HH:MM  ") # label de text
+l4=Label(f6, text="  segons. ") # label de text
 l4.pack(side=RIGHT) # Apilem a la dreta
-
-e3=Entry(f6, width=3) # entrada de text per als minuts de la funció run late
-e3.pack(side=RIGHT) # Apilem a la dreta
-
-l5=Label(f6, text=":") # label de més text
-l5.pack(side=RIGHT) # Apilem a la dreta
 
 e4=Entry(f6, width=3) # entrada de text per a les hores de la funció run late
 e4.pack(side=RIGHT) # Apilem a la dreta
 
-l6=Label(f6, text="Executa un cop a les ")	# label
+l6=Label(f6, text="Executa d'aquí a: ")	# label
 l6.pack(side=RIGHT) # Apilem a la dreta
 #}
 #{
