@@ -54,7 +54,6 @@ def EscullDirectori():
 		title="Escollir directori", #Títol de la finestra
 		mustexist=TRUE )	#El directori ha d'existir
 	l1.configure(text=directori) # Assignem el directori al label
-	global directoritriat
 
 b1=Button(f1,text='Escollir directori de treball',command=EscullDirectori)	#Creem el botó i li assignem la comanda de preguntar el directori
 b1.pack(side=LEFT)	 #l'apilem a l'esquerra
@@ -73,25 +72,21 @@ f2.pack(side=TOP, fill=X) #aliniem a la part de dalt i li permetem expandir-se
 # Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
 # Si pot executar-se o no. (si hem obert algun script amb anterioritat)
 def ObrirScript():
-	if directori !=0: # Entrem si l'usuari ja ha triat directori
-		global file # Fem la variable fitxer global per a modificar-la
-		file=tkFileDialog.askopenfilename(initialdir=directori, title="Obrir fitxer", filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
-		if file:									# Si no escollim cap fitxer, llavors no entrem al if
-			try:
-				global nomf							# Accedim a la memoria global
-				nomf = os.path.basename(file)		# Obtenim el nom del fitxer
-				e1.delete(0, END)					# Borrem el contingut de l'entry
-				e1.insert(0, nomf)					# I li assiggnem el nom del fitxer
-				f = open (file, 'r')				# Obrir fitxer, en mode lectura
-				content=f.read()					# Llegim tot el fitxer i l'emmagatzemem
-				st.delete(1.0,END)					# Fem un clean del text
-				st.insert(END, content)				# Insertem el contingut del fitxer
-				f.close()							# Tanquem el fitxer
-			except IOError:
-				tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
-	else:
-		tkMessageBox.showerror(title="Error", message="Error: Primer cal triar un directori de treball!")	# Si captem una excepció E/S mostrem el missatge
-
+	global file # Fem la variable fitxer global per a modificar-la
+	file=tkFileDialog.askopenfilename(initialdir=directori, title="Obrir fitxer", filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
+	if file:									# Si no escollim cap fitxer, llavors no entrem al if
+		try:
+			global nomf							# Accedim a la memoria global
+			nomf = os.path.basename(file)		# Obtenim el nom del fitxer
+			e1.delete(0, END)					# Borrem el contingut de l'entry
+			e1.insert(0, nomf)					# I li assiggnem el nom del fitxer
+			f = open (file, 'r')				# Obrir fitxer, en mode lectura				
+			content=f.read()					# Llegim tot el fitxer i l'emmagatzemem
+			st.delete(1.0,END)					# Fem un clean del text
+			st.insert(END, content)				# Insertem el contingut del fitxer
+			f.close()							# Tanquem el fitxer
+		except IOError:
+			tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
 
 b2=Button(f2, text="Obrir Script", command=ObrirScript) #botó per a obrir script
 b2.pack(side=LEFT) #l'apilem a l'esquerra
@@ -119,32 +114,16 @@ b3.pack(side=RIGHT)	#L'apilem a la dreta
 
 #Genera un nou script amb el nom indicat a l'Entry e1 en el directori que indica label l1
 #Cal fer dues excepcions si no hi han valors o bé el string de nom de fitxer es incorrecte
-def GuardarNouScript():
-	borrar=1									# Activem flag de borrar
-	if directori !=0:							# Entrem si l'usuari ja ha triat directori
+def GuardarNouScript():						
 		try:
-			nomf = e1.get()						# Obtenim nom de fitxer triat per l'usuari
-			if nomf:							# Si ha introduit un nom procedim, sino...
-				if not nomf.endswith('.sh'):	# Si el nom de fitxer no acaba amb .sh
-					nomf = nomf + ".sh"			# L'afegim nosaltres
-				path = directori + "/" + nomf	# Creem el path de fitxer, juntant directori actual amb nom de fitxer
-				if os.path.isfile(path):		# Mirem si ja existeix, i si ho fa mostrem opció per a sobreeescriure o no
-					result = tkMessageBox.askquestion(title="Atenció", message="El fitxer ja existeix, estàs segur que vols sobreescriure'l?", icon='warning')
-					if result=='no':
-						borrar = 0				# Si no vol sobreeescriure baixem el flag
-				if borrar == 1:					# Si ha premut si el flag segueix pujat i entrem al if
-					f = open (path, 'w+')		# Obrim el fitxer en mode w+ per si no existeix, llavors es crearà, sino farà un clean
-					#f.truncate(0)				# Netegem el fitxer
-					text = st.get(1.0, END)		# Obtenim el text del text box
-					f.write(text)				# Guardem el text al fitxer
-					f.close()					# Tanquem fitxer
-			else:								# Mostrem l'error
-				tkMessageBox.showerror(title="Error", message="Per a guardar cal triar un nom de fitxer")	# Si captem una excepció E/S mostrem el missatge
+			f=tkFileDialog.asksaveasfile(initialdir=directori, title="Guardar com", defaultextension='.sh')
+			if f:
+				text=st.get(1.0, END)
+				f.write(text)
+				f.close()
 		except IOError:
 			tkMessageBox.showerror(title="Error I/O", message="Error E/S")	# Si captem una excepció E/S mostrem el missatge
-	else:
-		tkMessageBox.showerror(title="Error I/O", message="Per a guardar cal triar un directori de treball")	# Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-
+	
 
 
 b4=Button(mainw, text="Guardar en un nou script", command=GuardarNouScript)	#Botó per a generar la funció de dalt
