@@ -37,14 +37,11 @@ mainw=Tk()
 mainw.title("Execució d'Scripts en el temps")
 
 #Var
-	# nomf						nom del fitxer obert
-file = 0						# ruta al fitxer  (inclou nom)
-carregat = 0					# Flag: Indica si s'ha carregat un fitxer
-directori = 0					# directori de treball actual
-nomf = 0						# Nom del fitxer obert
+file = 0						# 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
+directori = 0					# 0 si no s'ha carregat, directori de treball actual si s'ha carregat
+nomf = 0						# 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
 stdouttxt = ""					# String amb stdout
 stderrtxt = ""					# String amb stderr
-	#
 #Elements main window
 #{
 f1=Frame(mainw, bg="grey")	#Creem primer frame, li donem el color gris
@@ -232,15 +229,25 @@ def RunNow():
 	stdout=PIPE,										# Per a poder obtenir stdout
 	stderr=PIPE)										# Per a poder obtenir stderr
 	stdouttxt, stderrtxt = rc.communicate()				# Obtenim les sortides
-# Part opcional dels checkboxes
+# Part dels checkboxes
 	if std1.get():										# Si l'usuari ha marcat el checkbox del stdout...
-		f = open ("tmp.out", 'w+')						# Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
-		f.write(stdouttxt)								# Hi escrivim la sortida
-		f.close()										# Tanquem
+		if nomf!=0:										# Si s'ha obert un fitxer
+			f = open (nomf+".out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
+			f.write(stdouttxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
+		else:											# Sino li donem un altre nom
+			f = open ("script.out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
+			f.write(stdouttxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
 	if std2.get():										# Si l'usuari ha marcat el checkbox del stderr...
-		f = open ("tmp.err", 'w+')						# Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
-		f.write(stderrtxt)								# Hi escrivim la sortida
-		f.close()										# Tanquem
+		if nomf!=0:										# Si s'ha obert un fitxer
+			f = open (nomf+".err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
+			f.write(stderrtxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
+		else:											# Sino li donem un altre nom
+			f = open ("script.err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
+			f.write(stderrtxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
 
 b5=Button(f5, text="Run", command=RunNow)	#Executa la funció de dalt
 b5.pack(side=RIGHT)		# apilem a la dreta
