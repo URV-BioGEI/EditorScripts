@@ -311,35 +311,114 @@ l6=Label(f6, text="Executa d'aquí a: ")	# label
 l6.pack(side=RIGHT) # Apilem a la dreta
 #}
 #{
+f9=Frame(mainw) 	# Frame de la part opcional de executa amb format at, per això no segueix la numeració
+f9.pack(side=TOP, fill=X)
+
+# Corre l'script en un moment determinat en format de at
+def RunAt():
+	print "Falta la puta funció"
+
+b9=Button(f9, text="Run", command=RunAt)	# Botó per a executar la funció anterior
+b9.pack(side=RIGHT) # Apilem a la dreta
+
+l10=Label(f9, text="  de 'at'   ")	# label
+l10.pack(side=RIGHT) # Apilem a la dreta
+
+e7=Entry(f9, width=7) # entrada de text que correspon a les hores
+e7.pack(side=RIGHT) # Apilem a la dreta
+
+l11=Label(f9, text="Executa un cop amb format ")	# label
+l11.pack(side=RIGHT) # Apilem a la dreta
+#{
 f7=Frame(mainw)		# Afegim un frame. Aquest contindrà els botons per a executar l'script periodicament
 f7.pack(side=TOP, fill=X)	# ho posem a la paret nort i expandim en x
 
-# Programa de manera periòdica l'execució de l’script a una hora
-# i minut de cada dia. Fer servir la comanda «crontab». S’ha de vigilar que no es
-# desprogramin d’altres scripts anteriors.
-# Obté l'hora de e6:e5 en format HH:MM
+"""En la programació de l’execució de l’script de manera periòdica. Permetre
+tota la potencia de descripcions del temps de la comanda «crontab». Caldrà modificar
+els camps que indiquen el temps per a tenir com a mínim cinc camps strings per a
+indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
+
 def RunPeriod():
-	print "Falta la funció RunPeriod"
+	global st, stdouttxt, stderrtxt						# Accedim a variables globals
+	ubicacio="/tmp/tmp.sh"								# Assignem la ubicació del fitxer temporal script
+	arguments = ubicacio + " " +e2.get()				# Obtenim els arguments (executar script i passar arguments)
+	com = st.get(1.0, END)								# Obtenim el text del fitxer
+	f = open(ubicacio, 'w+')							# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+	f.write(com)										# Escrivim el script
+	f.close()											# Tanquem el fitxer
+	os.system("chmod +x /tmp/tmp.sh")					# Donem permisos d'execució
+	rc = subprocess.Popen(								# Cridem al modul subprocess
+	arguments, 											# Li passem les comandes (execució + parametres)
+	shell=True,											# Pel tipus de crida aquest ha de ser true
+	stdout=PIPE,										# Per a poder obtenir stdout
+	stderr=PIPE)										# Per a poder obtenir stderr
+	stdouttxt, stderrtxt = rc.communicate()				# Obtenim les sortides
+# Part dels checkboxes
+	if std1.get():										# Si l'usuari ha marcat el checkbox del stdout...
+		if nomf!=0:										# Si s'ha obert un fitxer
+			f = open (nomf+".out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
+			f.write(stdouttxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
+		else:											# Sino li donem un altre nom
+			f = open ("script.out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
+			f.write(stdouttxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
+	if std2.get():										# Si l'usuari ha marcat el checkbox del stderr...
+		if nomf!=0:										# Si s'ha obert un fitxer
+			f = open (nomf+".err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
+			f.write(stderrtxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
+		else:											# Sino li donem un altre nom
+			f = open ("script.err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
+			f.write(stderrtxt)							# Hi escrivim la sortida
+			f.close()									# Tanquem
 
 b7=Button(f7, text="Run", command=RunPeriod)	# Botó per a executar la funció anterior
 b7.pack(side=RIGHT) # Apilem a la dreta
 
-l7=Label(f7, text="  HH:MM  ")	# label de text informatiu
+l7=Label(f7, text=" crontab  ")	# label de text informatiu
 l7.pack(side=RIGHT) # Apilem a la dreta
 
-e5=Entry(f7, width=3) # entrada de text que correspon als minuts
+e5=Entry(f7, width=2) # entrada de text dS
 e5.pack(side=RIGHT) # Apilem a la dreta
 
-l8=Label(f7, text=":") # label de text informatiu
-l8.pack(side=RIGHT) # Apilem a la dreta
-
-e6=Entry(f7, width=3) # entrada de text que correspon a les hores
+e6=Entry(f7, width=2) # entrada de text Mes
 e6.pack(side=RIGHT) # Apilem a la dreta
 
-l9=Label(f7, text="Programa cada dia a les ") # label de text informatiu
+e8=Entry(f7, width=2) # entrada de text dM
+e8.pack(side=RIGHT) # Apilem a la dreta
+
+e9=Entry(f7, width=2) # entrada de text hh
+e9.pack(side=RIGHT) # Apilem a la dreta
+
+e8=Entry(f7, width=2) # entrada de text mm
+e8.pack(side=RIGHT) # Apilem a la dreta
+
+l9=Label(f7, text="Programa cada dia amb format") # label de text informatiu
 l9.pack(side=RIGHT) # Apilem a la dreta
 #}
-#{
+
+f10=Frame(mainw)		# frame per als labels del camp de crontab
+f10.pack(side=TOP, fill=X) # Apilem a la esquerra i permetem l'expansió X
+
+l12=Label(f10, text="                           ") # label de text informatiu
+l12.pack(side=RIGHT) # Apilem a la dreta
+
+l13=Label(f10, text="dS") # label de text informatiu
+l13.pack(side=RIGHT) # Apilem a la dreta
+
+l14=Label(f10, text="Mes") # label de text informatiu
+l14.pack(side=RIGHT) # Apilem a la dreta
+
+l15=Label(f10, text="dM") # label de text informatiu
+l15.pack(side=RIGHT) # Apilem a la dreta
+
+l16=Label(f10, text="hh") # label de text informatiu
+l16.pack(side=RIGHT) # Apilem a la dreta
+
+l17=Label(f10, text="mm") # label de text informatiu
+l17.pack(side=RIGHT) # Apilem a la dreta
+#4
 f8=Frame(mainw)		# frame per al botó de sortida
 f8.pack(side=TOP, fill=X) # Apilem a la esquerra i permetem l'expansió X
 
