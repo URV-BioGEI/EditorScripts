@@ -9,6 +9,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import sys
 import time
+import thread
 #MAIN
 #Paràmetres de finestra principal
 
@@ -269,34 +270,58 @@ def RunLate():
             tkMessageBox.showerror(title="Error en els segons.",
                                    message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         else:
-            ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-            arguments = "sleep " + str(segons) + " && " + ubicacio + " " + e2.get() + " &" # Obtenim els arguments (executar script i passar arguments)
-            com = st.get(1.0, END)  # Obtenim el text del fitxer
-            f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-            f.write(com)  # Escrivim el script
-            f.close()  # Tanquem el fitxer
-            os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-            rc = subprocess.Popen(  # Cridem al modul subprocess
-                arguments,  # Li passem les comandes (execució + parametres)
-                shell=True,  # Pel tipus de crida aquest ha de ser true
-                stdout=PIPE,  # Per a poder obtenir stdout
-                stderr=PIPE)  # Per a poder obtenir stderr
-            stdouttxt, stderrtxt = rc.communicate()  # Obtenim les sortides
-            # Part opcional dels checkboxes
-            if std1.get():  # Si l'usuari ha marcat el checkbox del stdout...
-                f = open("tmp.out",
-                         'w+')  # Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
-                f.write(stdouttxt)  # Hi escrivim la sortida
-                f.close()  # Tanquem
-            if std2.get():  # Si l'usuari ha marcat el checkbox del stderr...
-                f = open("tmp.err",
-                         'w+')  # Obrim el fitxer en mode w+, per a fer el clean. (?) Caldra cambiar el nom segurament
-                f.write(stderrtxt)  # Hi escrivim la sortida
-                f.close()  # Tanquem
+            # execute_delay(segons)
+            execute_at("now + 1 minute")
     except Exception as e:
         tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
 
+def execute_delay(seconds):
+    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
+    arguments = "sleep " + str(seconds) + " && " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
+    com = st.get(1.0, END)  # Obtenim el text del fitxer
+    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+    f.write(com)  # Escrivim el script
+    f.close()  # Tanquem el fitxer
+    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
+    rc = subprocess.Popen(  # Cridem al modul subprocess
+        arguments,  # Li passem les comandes (execució + parametres)
+        shell=True,  # Pel tipus de crida aquest ha de ser true
+        stdout=PIPE,  # Per a poder obtenir stdout
+        stderr=PIPE)  # Per a poder obtenir stderr
+    stdouttxt, stderrtxt = rc.communicate()  # Obtenim les sortides
+    # Part dels checkboxes
+    if std1.get():  # Si l'usuari ha marcat el checkbox del stdout...
+        if nomf != 0:  # Si s'ha obert un fitxer
+            f = open(nomf + ".out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
+            f.write(stdouttxt)  # Hi escrivim la sortida
+            f.close()  # Tanquem
+        else:  # Sino li donem un altre nom
+            f = open("script.out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
+            f.write(stdouttxt)  # Hi escrivim la sortida
+            f.close()  # Tanquem
+    if std2.get():  # Si l'usuari ha marcat el checkbox del stderr...
+        if nomf != 0:  # Si s'ha obert un fitxer
+            f = open(nomf + ".err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
+            f.write(stderrtxt)  # Hi escrivim la sortida
+            f.close()  # Tanquem
+        else:  # Sino li donem un altre nom
+            f = open("script.err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
+            f.write(stderrtxt)  # Hi escrivim la sortida
+            f.close()  # Tanquem
 
+def execute_at(command):
+    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
+    arguments = "at " + str(command) + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
+    com = st.get(1.0, END)  # Obtenim el text del fitxer
+    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+    f.write(com)  # Escrivim el script
+    f.close()  # Tanquem el fitxer
+    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
+    rc = subprocess.Popen(  # Cridem al modul subprocess
+        arguments,  # Li passem les comandes (execució + parametres)
+        shell=True,  # Pel tipus de crida aquest ha de ser true
+        stdout=PIPE,  # Per a poder obtenir stdout
+        stderr=PIPE)  # Per a poder obtenir stderr
 
 b6=Button(f6, text="Run", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
