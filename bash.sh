@@ -4,6 +4,7 @@ echo $1
 echo $2
 echo $*
 echo "poniii"
-touch /tmp/tmpss
+date >> /tmp/crontabprov
 ls cafe
+
 

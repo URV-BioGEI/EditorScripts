@@ -277,7 +277,7 @@ def RunLate():
 
 
 
-b6=Button(f6, text="Run", command=RunLate)	#Executa la funció de dalt
+b6=Button(f6, text="RunLate", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
 
 l4=Label(f6, text="  segons. ") # label de text
@@ -318,41 +318,51 @@ els camps que indiquen el temps per a tenir com a mínim cinc camps strings per 
 indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
 
 def RunPeriod():
-	global st, stdouttxt, stderrtxt						# Accedim a variables globals
-	ubicacio="/tmp/tmp.sh"								# Assignem la ubicació del fitxer temporal script
-	arguments = ubicacio + " " +e2.get()				# Obtenim els arguments (executar script i passar arguments)
+	global st
+	ubicacio="/tmp/task"									# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
 	com = st.get(1.0, END)								# Obtenim el text del fitxer
-	f = open(ubicacio, 'w+')							# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-	f.write(com)										# Escrivim el script
-	f.close()											# Tanquem el fitxer
-	os.system("chmod +x /tmp/tmp.sh")					# Donem permisos d'execució
-	rc = subprocess.Popen(								# Cridem al modul subprocess
-	arguments, 											# Li passem les comandes (execució + parametres)
-	shell=True,											# Pel tipus de crida aquest ha de ser true
-	stdout=PIPE,										# Per a poder obtenir stdout
-	stderr=PIPE)										# Per a poder obtenir stderr
-	stdouttxt, stderrtxt = rc.communicate()				# Obtenim les sortides
-# Part dels checkboxes
-	if std1.get():										# Si l'usuari ha marcat el checkbox del stdout...
-		if nomf!=0:										# Si s'ha obert un fitxer
-			f = open (nomf+".out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
-			f.write(stdouttxt)							# Hi escrivim la sortida
-			f.close()									# Tanquem
-		else:											# Sino li donem un altre nom
-			f = open ("script.out", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
-			f.write(stdouttxt)							# Hi escrivim la sortida
-			f.close()									# Tanquem
-	if std2.get():										# Si l'usuari ha marcat el checkbox del stderr...
-		if nomf!=0:										# Si s'ha obert un fitxer
-			f = open (nomf+".err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean.
-			f.write(stderrtxt)							# Hi escrivim la sortida
-			f.close()									# Tanquem
-		else:											# Sino li donem un altre nom
-			f = open ("script.err", 'w+')				# Obrim el fitxer en mode w+, per a fer el clean. 
-			f.write(stderrtxt)							# Hi escrivim la sortida
-			f.close()									# Tanquem
+	try:
+		f = open(ubicacio , 'w+')							# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+		f.write(com)										# Escrivim el script (?) falta el nombre aleatori
+		f.close()				# Tanquem el fitxer
+		os.system("chmod +x " + ubicacio)						# Donem permisos d'execució
+		#Obtenir informació
+		correcte = 1
+		dS = e5.get()
+		if not dS:
+			correcte = 0
+		Mes = e6.get()
+		if not Mes:
+			correcte = 0
+		dM = e8.get()
+		if not dM:
+			correcte = 0
+		hh = e9.get()
+		if not hh:
+			correcte = 0
+		mm = e10.get()
+		if not mm:
+			correcte = 0
+		if correcte == 1:
+			whoami = subprocess.Popen("whoami", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
+			out, err = whoami.communicate()
+			usuari = out.rstrip()
+			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + usuari + " " + ubicacio + "\" >> " + ubicacio + "numrand"
+			print stri
+			os.system(stri)
+			cron = subprocess.Popen("crontab " + ubicacio + "numrand", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
+			out, err = cron.communicate()
+			print out
+			print err
+			if err:
+				tkMessageBox.showerror(title="Error", message="Format incorrecte de crontab: m correspon al minut en què es va a executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la mitjanit.diu fa referència al dia del mes, per exemple es pot especificar 15 si es vol executar cada dia 15 dow significa el dia de la setmana, pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
 
-b7=Button(f7, text="Run", command=RunPeriod)	# Botó per a executar la funció anterior
+		else:
+			tkMessageBox.showerror(title="Falten dades", message="Emplena tots els camps de l'esquerra")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+	except IOError:
+		tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+
+b7=Button(f7, text="RunPeriod", command=RunPeriod)	# Botó per a executar la funció anterior
 b7.pack(side=RIGHT) # Apilem a la dreta
 
 l7=Label(f7, text=" crontab  ")	# label de text informatiu
@@ -370,8 +380,8 @@ e8.pack(side=RIGHT) # Apilem a la dreta
 e9=Entry(f7, width=2) # entrada de text hh
 e9.pack(side=RIGHT) # Apilem a la dreta
 
-e8=Entry(f7, width=2) # entrada de text mm
-e8.pack(side=RIGHT) # Apilem a la dreta
+e10=Entry(f7, width=2) # entrada de text mm
+e10.pack(side=RIGHT) # Apilem a la dreta
 
 l9=Label(f7, text="Programa cada dia amb format") # label de text informatiu
 l9.pack(side=RIGHT) # Apilem a la dreta
