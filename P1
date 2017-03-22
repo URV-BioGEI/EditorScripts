@@ -288,26 +288,6 @@ def execute_delay(seconds):
         shell=True,  # Pel tipus de crida aquest ha de ser true
         stdout=PIPE,  # Per a poder obtenir stdout
         stderr=PIPE)  # Per a poder obtenir stderr
-    stdouttxt, stderrtxt = rc.communicate()  # Obtenim les sortides
-    # Part dels checkboxes
-    if std1.get():  # Si l'usuari ha marcat el checkbox del stdout...
-        if nomf != 0:  # Si s'ha obert un fitxer
-            f = open(nomf + ".out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stdouttxt)  # Hi escrivim la sortida
-            f.close()  # Tanquem
-        else:  # Sino li donem un altre nom
-            f = open("script.out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stdouttxt)  # Hi escrivim la sortida
-            f.close()  # Tanquem
-    if std2.get():  # Si l'usuari ha marcat el checkbox del stderr...
-        if nomf != 0:  # Si s'ha obert un fitxer
-            f = open(nomf + ".err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stderrtxt)  # Hi escrivim la sortida
-            f.close()  # Tanquem
-        else:  # Sino li donem un altre nom
-            f = open("script.err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stderrtxt)  # Hi escrivim la sortida
-            f.close()  # Tanquem
 
 def execute_at(command):
     ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
