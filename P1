@@ -323,7 +323,7 @@ def RunAt():	# (?) falta la part de les excepcions
     try:
     	commands = e7.get()
     	if not commands:
-            tkMessageBox.showerror(title="Error en les comandes.", message="Introduiu una comanda AT Vàlida.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            tkMessageBox.showerror(title="Error en les comandes.", message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" ja s'afegeix automàticament.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         else:
         	ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
         	arguments = "at " + commands + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
@@ -332,7 +332,10 @@ def RunAt():	# (?) falta la part de les excepcions
         	f.write(com)  # Escrivim el script
         	f.close()  # Tanquem el fitxer
         	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)  
+        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
+		out, err = rc.communicate()
+		if err:
+			tkMessageBox.showerror(title="Error", message=err)
     except Exception as e:
         tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
 
