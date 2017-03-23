@@ -370,6 +370,7 @@ def RunPeriod():
 		f.write(com)													# Escrivim el script (?) falta el nombre aleatori
 		f.close()														# Tanquem el fitxer
 		os.system("chmod +x " + ubicacio)								# Donem permisos d'execució
+		os.system("chmod +x " + file)
 		# Obtenir informació
 		correcte = 1													# Flag per entrar a la funció (comprova que tot estigui bé)
 		dS = e5.get()													# Obtenim el camp dS
