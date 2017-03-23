@@ -256,52 +256,6 @@ def RunLate():
        	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
     
-    
-"""
-# Programa l’execució de l’script mitjançant la comanda «at» a una
-# hora i minut determinats. Caldrà buscar informació sobre la comanda
-# Obtenim el temps en el format HH:MM -> e4:e3
-def RunLate():
-    global st, stdouttxt, stderrtxt  # Accedim a variables globals
-    try:
-        segons = int(e4.get())
-        if(segons < 0):
-            tkMessageBox.showerror(title="Error en els segons.",
-                                   message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-        else:
-            # execute_delay(segons)
-            execute_at("now + 1 minute")
-    except Exception as e:
-        tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-
-def execute_delay(seconds):
-    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-    arguments = "sleep " + str(seconds) + " && " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
-    com = st.get(1.0, END)  # Obtenim el text del fitxer
-    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-    f.write(com)  # Escrivim el script
-    f.close()  # Tanquem el fitxer
-    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-    rc = subprocess.Popen(  # Cridem al modul subprocess
-        arguments,  # Li passem les comandes (execució + parametres)
-        shell=True,  # Pel tipus de crida aquest ha de ser true
-        stdout=PIPE,  # Per a poder obtenir stdout
-        stderr=PIPE)  # Per a poder obtenir stderr
-
-def execute_at(command):
-    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-    arguments = "at " + str(command) + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
-    com = st.get(1.0, END)  # Obtenim el text del fitxer
-    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-    f.write(com)  # Escrivim el script
-    f.close()  # Tanquem el fitxer
-    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-    rc = subprocess.Popen(  # Cridem al modul subprocess
-        arguments,  # Li passem les comandes (execució + parametres)
-        shell=True,  # Pel tipus de crida aquest ha de ser true
-        stdout=PIPE,  # Per a poder obtenir stdout
-        stderr=PIPE)  # Per a poder obtenir stderr
-"""
 b6=Button(f6, text="RunLate", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
 
