@@ -4,7 +4,9 @@ echo $1
 echo $2
 echo $*
 echo "poniii"
-date >> /tmp/crontabprov
+date >> /home/amt/Escritorio/desssprecio
 ls cafe
+
+
 
 
