@@ -322,8 +322,8 @@ f9.pack(side=TOP, fill=X)
 def RunAt():	# (?) falta la part de les excepcions
     try:
     	commands = e7.get()
-    	if(segons < 0):
-            tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+    	if not commands:
+            tkMessageBox.showerror(title="Error en les comandes.", message="Introduiu una comanda AT Vàlida.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         else:
         	ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
         	arguments = "at " + commands + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
