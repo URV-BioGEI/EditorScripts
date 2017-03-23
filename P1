@@ -358,7 +358,7 @@ els camps que indiquen el temps per a tenir com a mínim cinc camps strings per 
 indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
 
 def RunPeriod():
-	global st
+	global st, file
     	rnd = random.randrange(10000)
 	ubicacio="/tmp/task"+str(rnd)										# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
 	com = st.get(1.0, END)												# Obtenim el text del fitxer
@@ -385,7 +385,7 @@ def RunPeriod():
 		if not mm:
 			correcte = 0
 		if correcte == 1:												# Mirem que tots siguin correctes
-			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + ubicacio + "\" >> " + ubicacio + "numrand" # Generem l'string
+			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + file + "\" >> " + ubicacio + "numrand" # Generem l'string
 			os.system(stri)	
 			print stri											# li pasem l'string
 			cron = subprocess.Popen("crontab " + ubicacio + "numrand", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
