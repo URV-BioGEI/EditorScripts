@@ -9,7 +9,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import sys
 import time
-import thread
+import random
 #MAIN
 #Paràmetres de finestra principal
 
@@ -359,7 +359,8 @@ indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
 
 def RunPeriod():
 	global st
-	ubicacio="/tmp/task"												# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
+    	rnd = random.randrange(10000)
+	ubicacio="/tmp/task"+str(rnd)										# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
 	com = st.get(1.0, END)												# Obtenim el text del fitxer
 	try:
 		f = open(ubicacio , 'w+')										# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
