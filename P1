@@ -176,7 +176,7 @@ f4.pack(side=TOP, fill=X)	# l'apilem cap a dalt i emplenem en X
 # darrera execució de l’script.
 def VeureStderr():
 	r = MyDialog(mainw, stderrtxt)
-    mainw.wait_window(r.top)
+	mainw.wait_window(r.top)
 
 b5=Button(f4, text="Veure Stderr", command=VeureStderr) 	# Botó que executa la funció de dalt
 b5.pack(side=RIGHT)		# Ho apilem a la part dreta
