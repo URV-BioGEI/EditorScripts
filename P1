@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE
 import sys
 import time
 import random
+import inspect
 #MAIN
 #Paràmetres de finestra principal
 
@@ -245,18 +246,20 @@ f6.pack(side=TOP, fill=X)	# apilem a dalt i permetem l'expansió X
 # Obtenim el temps en el format HH:MM -> e4:e3
 def RunLate():
     global st, stdouttxt, stderrtxt  # Accedim a variables globals
+    rnd = random.randrange(10000)
     segons = e4.get()
-    if(segons < 0):
-        tkMessageBox.showerror(title="Error de temps", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-    else:
-     	ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
+    if(segons > 0):
+    	ubicacio="/tmp/" + str(rnd) + "Late.sh"
       	arguments = "sleep " + segons + " && " + ubicacio + " " + e2.get()  # Obtenim els arguments (executar script i passar arguments)
        	com = st.get(1.0, END)  # Obtenim el text del fitxer
        	f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
        	f.write(com)  # Escrivim el script
        	f.close()  # Tanquem el fitxer
-       	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
+       	os.system("chmod +x " + ubicacio)  # Donem permisos d'execució
        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
+    else:
+    	tkMessageBox.showerror(title="Error de temps", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+
     
 b6=Button(f6, text="RunLate", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
@@ -277,17 +280,22 @@ f9.pack(side=TOP, fill=X)
 # Corre l'script en un moment determinat en format de at
 def RunAt():	# (?) falta la part de les excepcions
     try:
+    	rnd = random.randrange(10000)
     	commands = e7.get()
     	if not commands:
             tkMessageBox.showerror(title="Error en les comandes.", message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" ja s'afegeix automàticament.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         else:
-        	ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-        	arguments = "at " + commands + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
+        	if directori==0:
+    			ubicacio = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
+    		else:
+    			ubicacio=directori +"/"
+    		fitxer=ubicacio+str(rnd)+"At.sh"
+        	arguments = "at " + commands + " -f " + "\"" + fitxer + "\"" + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
         	com = st.get(1.0, END)  # Obtenim el text del fitxer
-        	f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+        	f = open(fitxer, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
         	f.write(com)  # Escrivim el script
         	f.close()  # Tanquem el fitxer
-        	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
+        	os.system("chmod +x \""+ fitxer + "\"")  # Donem permisos d'execució
         	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
 		out, err = rc.communicate()
 		if err:
@@ -319,44 +327,49 @@ indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
 def RunPeriod():
 	global st, file
     	rnd = random.randrange(10000)
-	ubicacio="/tmp/task"+str(rnd)										# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
 	com = st.get(1.0, END)												# Obtenim el text del fitxer
-	try:
-		f = open(ubicacio , 'w+')										# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+	if directori==0:
+		ubicacio = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
+	else:
+   		ubicacio=directori
+   	fitxer=ubicacio + str(rnd) + "Period.sh"
+	# Obtenir informació
+	correcte = 1													# Flag per entrar a la funció (comprova que tot estigui bé)
+	dS = e5.get()													# Obtenim el camp dS
+	if not dS:
+		correcte = 0												# Si esta buit, posem un 0 per a indicar que esta malament											
+	Mes = e6.get()													# Així successivament
+	if not Mes:
+		correcte = 0
+	dM = e8.get()
+	if not dM:
+		correcte = 0
+	hh = e9.get()
+	if not hh:
+		correcte = 0
+	mm = e10.get()
+	if not mm:
+		correcte = 0
+	if correcte == 1:												# Mirem que tots siguin correctes
+		f = open(fitxer , 'w+')										# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+		fitxerc = "\"" + fitxer + "\\\""
+		fitxerq = "\"" + fitxer + "\""
 		f.write(com)													# Escrivim el script (?) falta el nombre aleatori
 		f.close()														# Tanquem el fitxer
-		os.system("chmod +x " + ubicacio)								# Donem permisos d'execució
-		os.system("chmod +x " + file)
-		# Obtenir informació
-		correcte = 1													# Flag per entrar a la funció (comprova que tot estigui bé)
-		dS = e5.get()													# Obtenim el camp dS
-		if not dS:
-			correcte = 0												# Si esta buit, posem un 0 per a indicar que esta malament											
-		Mes = e6.get()													# Així successivament
-		if not Mes:
-			correcte = 0
-		dM = e8.get()
-		if not dM:
-			correcte = 0
-		hh = e9.get()
-		if not hh:
-			correcte = 0
-		mm = e10.get()
-		if not mm:
-			correcte = 0
-		if correcte == 1:												# Mirem que tots siguin correctes
-			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + file + "\" >> " + ubicacio + "numrand" # Generem l'string
-			os.system(stri)	
-			print stri											# li pasem l'string
-			cron = subprocess.Popen("crontab " + ubicacio + "numrand", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
-			out, err = cron.communicate()
-			if err:
-				tkMessageBox.showerror(title="Error", message="Format incorrecte de crontab: m correspon al minut en què es va a executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la mitjanit.diu fa referència al dia del mes, per exemple es pot especificar 15 si es vol executar cada dia 15 dow significa el dia de la setmana, pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
-		else:
-			tkMessageBox.showerror(title="Falten dades", message="Emplena tots els camps de l'esquerra")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-	except IOError:
+		os.system("chmod +x " + fitxerq)								# Donem permisos d'execució
+		stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + "\\" +fitxerc +  "\" >> " + "\"" + ubicacio + "crontask" + "\"" # Generem l'string
+		os.system(stri)	
+		print stri
+		print ubicacio
+		cron = subprocess.Popen("crontab " + ubicacio + "crontask", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
+		out, err = cron.communicate()
+		if err:
+			tkMessageBox.showerror(title="Error", message="Format incorrecte de crontab: m correspon al minut en què es va a executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la mitjanit.diu fa referència al dia del mes, per exemple es pot especificar 15 si es vol executar cada dia 15 dow significa el dia de la setmana, pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
+	else:
+		tkMessageBox.showerror(title="Falten dades", message="Emplena tots els camps de l'esquerra")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+	"""except IOError:
 		tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-
+"""
 b7=Button(f7, text="RunPeriod", command=RunPeriod)	# Botó per a executar la funció anterior
 b7.pack(side=RIGHT) # Apilem a la dreta
 
@@ -381,7 +394,7 @@ e10.pack(side=RIGHT) # Apilem a la dreta
 l9=Label(f7, text="Programa cada dia amb format") # label de text informatiu
 l9.pack(side=RIGHT) # Apilem a la dreta
 #}
-
+#{
 f10=Frame(mainw)		# frame per als labels del camp de crontab
 f10.pack(side=TOP, fill=X) # Apilem a la esquerra i permetem l'expansió X
 
@@ -411,5 +424,5 @@ def Sortir():
 
 b8=Button(f8, text="Sortir", command=Sortir)	# Si apretem aquest botó tanquem la finestra
 b8.pack(side=LEFT) # Apilem a la esquerra
-
+#}
 mainw.mainloop()
