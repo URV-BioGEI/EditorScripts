@@ -9,7 +9,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import sys
 import time
-import thread
+import random
 #MAIN
 #Paràmetres de finestra principal
 
@@ -258,52 +258,6 @@ def RunLate():
        	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
     
-    
-"""
-# Programa l’execució de l’script mitjançant la comanda «at» a una
-# hora i minut determinats. Caldrà buscar informació sobre la comanda
-# Obtenim el temps en el format HH:MM -> e4:e3
-def RunLate():
-    global st, stdouttxt, stderrtxt  # Accedim a variables globals
-    try:
-        segons = int(e4.get())
-        if(segons < 0):
-            tkMessageBox.showerror(title="Error en els segons.",
-                                   message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-        else:
-            # execute_delay(segons)
-            execute_at("now + 1 minute")
-    except Exception as e:
-        tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-
-def execute_delay(seconds):
-    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-    arguments = "sleep " + str(seconds) + " && " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
-    com = st.get(1.0, END)  # Obtenim el text del fitxer
-    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-    f.write(com)  # Escrivim el script
-    f.close()  # Tanquem el fitxer
-    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-    rc = subprocess.Popen(  # Cridem al modul subprocess
-        arguments,  # Li passem les comandes (execució + parametres)
-        shell=True,  # Pel tipus de crida aquest ha de ser true
-        stdout=PIPE,  # Per a poder obtenir stdout
-        stderr=PIPE)  # Per a poder obtenir stderr
-
-def execute_at(command):
-    ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
-    arguments = "at " + str(command) + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments)
-    com = st.get(1.0, END)  # Obtenim el text del fitxer
-    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-    f.write(com)  # Escrivim el script
-    f.close()  # Tanquem el fitxer
-    os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-    rc = subprocess.Popen(  # Cridem al modul subprocess
-        arguments,  # Li passem les comandes (execució + parametres)
-        shell=True,  # Pel tipus de crida aquest ha de ser true
-        stdout=PIPE,  # Per a poder obtenir stdout
-        stderr=PIPE)  # Per a poder obtenir stderr
-"""
 b6=Button(f6, text="RunLate", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
 
@@ -324,8 +278,8 @@ f9.pack(side=TOP, fill=X)
 def RunAt():	# (?) falta la part de les excepcions
     try:
     	commands = e7.get()
-    	if(segons < 0):
-            tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+    	if not commands:
+            tkMessageBox.showerror(title="Error en les comandes.", message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" ja s'afegeix automàticament.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         else:
         	ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
         	arguments = "at " + commands + " -f " + ubicacio + " " + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
@@ -334,7 +288,10 @@ def RunAt():	# (?) falta la part de les excepcions
         	f.write(com)  # Escrivim el script
         	f.close()  # Tanquem el fitxer
         	os.system("chmod +x /tmp/tmp.sh")  # Donem permisos d'execució
-        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)  
+        	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
+		out, err = rc.communicate()
+		if err:
+			tkMessageBox.showerror(title="Error", message=err)
     except Exception as e:
         tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
 
@@ -360,14 +317,16 @@ els camps que indiquen el temps per a tenir com a mínim cinc camps strings per 
 indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
 
 def RunPeriod():
-	global st
-	ubicacio="/tmp/task"												# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
+	global st, file
+    	rnd = random.randrange(10000)
+	ubicacio="/tmp/task"+str(rnd)										# Assignem la ubicació del fitxer temporal script (?) falta posar el nombre aleatori
 	com = st.get(1.0, END)												# Obtenim el text del fitxer
 	try:
 		f = open(ubicacio , 'w+')										# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
 		f.write(com)													# Escrivim el script (?) falta el nombre aleatori
 		f.close()														# Tanquem el fitxer
 		os.system("chmod +x " + ubicacio)								# Donem permisos d'execució
+		os.system("chmod +x " + file)
 		# Obtenir informació
 		correcte = 1													# Flag per entrar a la funció (comprova que tot estigui bé)
 		dS = e5.get()													# Obtenim el camp dS
@@ -386,7 +345,7 @@ def RunPeriod():
 		if not mm:
 			correcte = 0
 		if correcte == 1:												# Mirem que tots siguin correctes
-			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + ubicacio + "\" >> " + ubicacio + "numrand" # Generem l'string
+			stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + file + "\" >> " + ubicacio + "numrand" # Generem l'string
 			os.system(stri)	
 			print stri											# li pasem l'string
 			cron = subprocess.Popen("crontab " + ubicacio + "numrand", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
