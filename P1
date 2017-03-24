@@ -246,20 +246,23 @@ f6.pack(side=TOP, fill=X)	# apilem a dalt i permetem l'expansió X
 # Obtenim el temps en el format HH:MM -> e4:e3
 def RunLate():
     global st, stdouttxt, stderrtxt  # Accedim a variables globals
-    rnd = random.randrange(10000)
-    segons = e4.get()
-    if(segons > 0):
-    	ubicacio="/tmp/" + str(rnd) + "Late.sh"
-      	arguments = "sleep " + segons + " && " + ubicacio + " " + e2.get()  # Obtenim els arguments (executar script i passar arguments)
-       	com = st.get(1.0, END)  # Obtenim el text del fitxer
-       	f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-       	f.write(com)  # Escrivim el script
-       	f.close()  # Tanquem el fitxer
-       	os.system("chmod +x " + ubicacio)  # Donem permisos d'execució
-       	rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
-    else:
-    	tkMessageBox.showerror(title="Error de temps", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-
+    try:
+        rnd = random.randrange(10000)
+        segons = int(e4.get())
+        if(segons > 0):
+    	    ubicacio="/tmp/" + str(rnd) + "Late.sh"
+      	    arguments = "sleep " + str(segons) + " && " + ubicacio + " " + e2.get()  # Obtenim els arguments (executar script i passar arguments)
+       	    com = st.get(1.0, END)  # Obtenim el text del fitxer
+       	    f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
+       	    f.write(com)  # Escrivim el script
+       	    f.close()  # Tanquem el fitxer
+       	    os.system("chmod +x " + ubicacio)  # Donem permisos d'execució
+       	    rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
+        else:
+    	    tkMessageBox.showerror(title="Error de temps", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+    except Exception as e:
+        tkMessageBox.showerror(title="Error de temps",
+                           message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
     
 b6=Button(f6, text="RunLate", command=RunLate)	#Executa la funció de dalt
 b6.pack(side=RIGHT)	# Apilem a la dreta
