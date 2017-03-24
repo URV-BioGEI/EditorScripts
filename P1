@@ -352,16 +352,19 @@ def RunPeriod():
 		correcte = 0
 	if correcte == 1:												# Mirem que tots siguin correctes
 		f = open(fitxer , 'w+')										# Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
-		fitxerc = "\"" + fitxer + "\\\""
+		fitxerc = "\"" + fitxer + "\""
 		fitxerq = "\"" + fitxer + "\""
 		f.write(com)													# Escrivim el script (?) falta el nombre aleatori
 		f.close()														# Tanquem el fitxer
 		os.system("chmod +x " + fitxerq)								# Donem permisos d'execució
-		stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + "\\" +fitxerc +  "\" >> " + "\"" + ubicacio + "crontask" + "\"" # Generem l'string
-		os.system(stri)	
-		print stri
+		s_file = open(ubicacio + "/crontask", 'w+')
+		s_file.write(mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " +fitxerc + "\n")
+		s_file.close()
+		# stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + "\\" +fitxerc +  "\" >> " + "\"" + ubicacio + "crontask" + "\"" # Generem l'string
+		# os.system(stri)
+		# print stri
 		print ubicacio
-		cron = subprocess.Popen("crontab " + ubicacio + "crontask", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
+		cron = subprocess.Popen("crontab " + ubicacio + "/crontask", shell=True, stdout=PIPE, stderr=PIPE)  # Obtenim nom d'usuari
 		out, err = cron.communicate()
 		if err:
 			tkMessageBox.showerror(title="Error", message="Format incorrecte de crontab: m correspon al minut en què es va a executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la mitjanit.diu fa referència al dia del mes, per exemple es pot especificar 15 si es vol executar cada dia 15 dow significa el dia de la setmana, pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
