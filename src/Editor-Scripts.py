@@ -6,57 +6,33 @@ import random
 import subprocess
 from subprocess import PIPE
 from tkinter import *
-from tkinter import filedialog as tkFileDialog
-from tkinter import messagebox as tkMessageBox  # Per a mostrar els dialegs
+from tkinter import filedialog
+from tkinter import messagebox  # Per a mostrar els diàlegs
 from tkinter import scrolledtext as tkst
+from MyDialog import MyDialog
 
-
-# MAIN
-# Paràmetres de finestra principal
-
-class MyDialog:
-    top = None
-
-    def __init__(self, parent, stdouttxt):
-        top = self.top = Toplevel(parent)
-        stout = tkst.ScrolledText(
-            master=top,  # incloem a la finestra fout aquest objecte
-            wrap='word',  # Fem que el text sigui de paraules (?)
-            width=60,  # carácters per fila
-            height=12,  # linies de text
-            bg='beige'  # color de fons
-        )
-        stout.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8, pady=8)
-        stout.delete(1.0, END)  # Fem un clean del text
-        stout.insert(END, stdouttxt)  # Insertem el contingut del stdout
-
-        b = Button(top, text="Close", command=self.ok)
-        b.pack(pady=5)
-
-    def ok(self):
-        self.top.destroy()
-
-
-def EscullDirectori():
+def choose_working_directory():
     global directori
-    directori = tkFileDialog.askdirectory(
+    directori = filedialog.askdirectory(
         parent=mainw,  # Fa que la nova finestra sigui pare de la finestra principal
         title="Escollir directori",  # Títol de la finestra
         mustexist=TRUE)  # El directori ha d'existir
     l1.configure(text=directori)  # Assignem el directori al label
 
 
-# Funció Obrir Script:
-# S'encarrega d'obrir l'Script a partir del nom (Entry e1) 
-# i de la ruta escollida (Label l1) 
-# i mostrar el contingut en el ScrolledText st
-# Cal implementar el cas de que el fitxer no existeixi o no tingui l'extensió sh
-# Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
-# Si pot executar-se o no. (si hem obert algun script amb anterioritat)
-def ObrirScript():
+def open_script():
+    """
+    Funció Obrir Script:
+    S'encarrega d'obrir l'Script a partir del nom (Entry e1) i de la ruta escollida (Label l1)
+    i mostrar el contingut en el ScrolledText st
+    Cal implementar el cas de que el fitxer no existeixi o no tingui l'extensió sh
+    Cal implementar algun tipus de comunicació (variable global) per a que guardar Script sàpiga
+    Si pot executar-se o no. (si hem obert algun script amb anterioritat)
+    :return:
+    """
     global file  # Fem la variable fitxer global per a modificar-la
-    file = tkFileDialog.askopenfilename(initialdir=directori, title="Obrir fitxer",
-                                        filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
+    file = filedialog.askopenfilename(initialdir=directori, title="Obrir fitxer",
+                                      filetypes=[("Fitxers d'Scripts Bash", "*.sh")])
     if file:  # Si no escollim cap fitxer, llavors no entrem al if
         try:
             global nomf  # Accedim a la memoria global
@@ -69,14 +45,17 @@ def ObrirScript():
             st.insert(END, content)  # Insertem el contingut del fitxer
             f.close()  # Tanquem el fitxer
         except IOError:
-            tkMessageBox.showerror(title="Error I/O",
-                                   message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
+            messagebox.showerror(title="Error I/O",
+                                 message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
 
 
-# Funció Guardar Script
-# S'encarrega d'agafar el contingut del ScrolledText st i passar-lo al fitxer que ja ha sigut obert obert
-# Per a executar-se un fitxer ha hagut de ser obert prèviament
-def GuardarScript():
+def save_script():
+    """
+    Funció Guardar Script
+    S'encarrega d'agafar el contingut del ScrolledText st i passar-lo al fitxer que ja ha sigut obert obert
+    Per a executar-se un fitxer ha hagut de ser obert prèviament
+    :return:
+    """
     if file != 0:  # Si el flag no es troba actiu...
         try:
             f = open(file, 'w+')  # Obrim el fitxer en mode escriptura +, farà clean abans
@@ -84,44 +63,54 @@ def GuardarScript():
             f.write(text)  # Guardem el text al fitxer
             f.close()  # Tanquem fitxer
         except IOError:
-            tkMessageBox.showerror(title="Error I/O",
-                                   message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
+            messagebox.showerror(title="Error I/O",
+                                 message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
     else:  # ...Mostrem missatge d'error
-        tkMessageBox.showerror(title="Error I/O",
-                               message="Per a guardar cal carregar un fitxer abans")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        messagebox.showerror(title="Error I/O",
+                             message="Per a guardar cal carregar un fitxer abans")
 
 
-# Genera un nou script amb el nom indicat a l'Entry e1 en el directori que indica label l1
-# Cal fer dues excepcions si no hi han valors o bé el string de nom de fitxer es incorrecte
-def GuardarNouScript():
+def save_new_script():
+    """
+    Genera un nou script amb el nom indicat a l'Entry e1 en el directori que indica label l1. Cal fer dues excepcions si
+    no hi han valors o bé el string de nom de fitxer es incorrecte
+    :return:
+    """
     try:
-        f = tkFileDialog.asksaveasfile(initialdir=directori, title="Guardar com", defaultextension='.sh')
+        f = filedialog.asksaveasfile(initialdir=directori, title="Guardar com", defaultextension='.sh')
         if f:
             text = st.get(1.0, END)
             f.write(text)
             f.close()
     except IOError:
-        tkMessageBox.showerror(title="Error I/O", message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
+        messagebox.showerror(title="Error I/O", message="Error E/S")  # Si captem una excepció E/S mostrem el missatge
 
 
-# Crea una subfinestra per a visualitzar si existeix la sortida de la
-# darrera execució de l’script.
-def VeureStderr():
+def see_stderr():
+    """
+    Crea una subfinestra per a visualitzar si existeix la sortida de la darrera execució de l’script.
+    :return:
+    """
     r = MyDialog(mainw, stderrtxt)
     mainw.wait_window(r.top)
 
 
-# Crea una subfinestra per a visualitzar si existeix la sortida de la
-# darrera execució de l’script.
-def VeureStdout():
+def see_stdout():
+    """
+    Crea una subfinestra per a visualitzar si existeix la sortida de la darrera execució de l’script.
+    :return:
+    """
     # global stout
     d = MyDialog(mainw, stdouttxt)
     mainw.wait_window(d.top)
 
 
-# Executa l’script escollit amb els arguments i redireccions
-# indicades de manera immediata.
-def RunNow():
+def run_now():
+    """
+    Executa l’script escollit amb els arguments i redireccions indicades de manera immediata.
+    :return:
+    """
     global st, stdouttxt, stderrtxt  # Accedim a variables globals
     ubicacio = "/tmp/tmp.sh"  # Assignem la ubicació del fitxer temporal script
     arguments = ubicacio + " " + e2.get()  # Obtenim els arguments (executar script i passar arguments)
@@ -157,40 +146,51 @@ def RunNow():
             f.close()  # Tanquem
 
 
-# Programa l’execució de l’script mitjançant la comanda «at» a una
-# hora i minut determinats. Caldrà buscar informació sobre la comanda
-# Obtenim el temps en el format HH:MM -> e4:e3
-def RunLate():
+def run_late():
+    """
+    Programa l’execució de l’script mitjançant la comanda «at» a una
+    hora i minut determinats. Caldrà buscar informació sobre la comanda
+    Obtenim el temps en el format HH:MM -> e4:e3
+    :return:
+    """
     global st, stdouttxt, stderrtxt  # Accedim a variables globals
     try:
         rnd = random.randrange(10000)
         segons = int(e4.get())
-        if (segons > 0):
+        if segons > 0:
             ubicacio = "/tmp/" + str(rnd) + "Late.sh"
-            arguments = "sleep " + str(
-                segons) + " && " + ubicacio + " " + e2.get()  # Obtenim els arguments (executar script i passar arguments)
+            # Obtenim els arguments (executar script i passar arguments)
+            arguments = "sleep " + str(segons) + " && " + ubicacio + " " + e2.get()
             com = st.get(1.0, END)  # Obtenim el text del fitxer
             f = open(ubicacio, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
             f.write(com)  # Escrivim el script
             f.close()  # Tanquem el fitxer
             os.system("chmod +x " + ubicacio)  # Donem permisos d'execució
-            rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
+            subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
         else:
-            tkMessageBox.showerror(title="Error de temps",
-                                   message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-    except Exception as e:
-        tkMessageBox.showerror(title="Error de temps",
-                               message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            messagebox.showerror(title="Error de temps",
+                                 message="Trieu un número vàlid de segons i major que 0.")
+    except IOError:
+        # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        messagebox.showerror(title="Error de temps",
+                             message="Trieu un número vàlid de segons i major que 0.")
 
 
-# Corre l'script en un moment determinat en format de at
-def RunAt():  # (?) falta la part de les excepcions
+def run_at():
+    """
+    Corre l'script en un moment determinat en format de at
+    :return:
+    """
     try:
+        err = None
         rnd = random.randrange(10000)
         commands = e7.get()
         if not commands:
-            tkMessageBox.showerror(title="Error en les comandes.",
-                                   message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" ja s'afegeix automàticament.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            messagebox.showerror(title="Error en les comandes.",
+                                 message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" "
+                                         "ja s'afegeix automàticament.")
         else:
             if directori == 0:
                 ubicacio = os.path.dirname(os.path.abspath(
@@ -198,28 +198,32 @@ def RunAt():  # (?) falta la part de les excepcions
             else:
                 ubicacio = directori + "/"
             fitxer = ubicacio + str(rnd) + "At.sh"
-            arguments = "at " + commands + " -f " + "\"" + fitxer + "\"" + e2.get() + ""  # Obtenim els arguments (executar script i passar arguments) (?) he suposat que lo de commands es loque hi ha a entry 7
+            # Obtenim els arguments (executar script i passar arguments)
+            arguments = "at " + commands + " -f " + "\"" + fitxer + "\"" + e2.get() + ""
             com = st.get(1.0, END)  # Obtenim el text del fitxer
             f = open(fitxer, 'w+')  # Obrim el fitxer en mode escriptura +, farà un clean abans d'escriure
             f.write(com)  # Escrivim el script
             f.close()  # Tanquem el fitxer
             os.system("chmod +x \"" + fitxer + "\"")  # Donem permisos d'execució
             rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
-        out, err = rc.communicate()
+            out, err = rc.communicate()
         if err:
-            tkMessageBox.showerror(title="Error", message=err)
-    except Exception as e:
-        tkMessageBox.showerror(title="Error en els segons.",
-                               message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+            messagebox.showerror(title="Error", message=err)
+    except IOError:
+        # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        messagebox.showerror(title="Error en els segons.",
+                             message="Trieu un número vàlid de segons i major que 0.")
 
 
-"""En la programació de l’execució de l’script de manera periòdica. Permetre
-tota la potencia de descripcions del temps de la comanda «crontab». Caldrà modificar
-els camps que indiquen el temps per a tenir com a mínim cinc camps strings per a
-indicar el temps en que s’ha d’executar l’script. (format * * * * *)"""
+def run_with_period():
+    """
+    En la programació de l’execució de l’script de manera periòdica. Permetre
+    tota la potencia de descripcions del temps de la comanda «crontab». Caldrà modificar
+    els camps que indiquen el temps per a tenir com a mínim cinc camps strings per a
+    indicar el temps en que s’ha d’executar l’script. (format * * * * *)
+    :return:
+    """
 
-
-def RunPeriod():
     global st, file
     rnd = random.randrange(10000)
     com = st.get(1.0, END)  # Obtenim el text del fitxer
@@ -231,14 +235,14 @@ def RunPeriod():
     fitxer = ubicacio + str(rnd) + "Period.sh"
     # Obtenir informació
     correcte = 1  # Flag per entrar a la funció (comprova que tot estigui bé)
-    dS = e5.get()  # Obtenim el camp dS
-    if not dS:
+    ds = e5.get()  # Obtenim el camp dS
+    if not ds:
         correcte = 0  # Si esta buit, posem un 0 per a indicar que esta malament
-    Mes = e6.get()  # Així successivament
-    if not Mes:
+    mes = e6.get()  # Així successivament
+    if not mes:
         correcte = 0
-    dM = e8.get()
-    if not dM:
+    dm = e8.get()
+    if not dm:
         correcte = 0
     hh = e9.get()
     if not hh:
@@ -254,30 +258,31 @@ def RunPeriod():
         f.close()  # Tanquem el fitxer
         os.system("chmod +x " + fitxerq)  # Donem permisos d'execució
         s_file = open(ubicacio + "/crontask", 'w+')
-        s_file.write(mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + fitxerc + "\n")
+        s_file.write(mm + " " + hh + " " + dm + " " + mes + " " + ds + " " + fitxerc + "\n")
         s_file.close()
-        # stri = "echo \"" + mm + " " + hh + " " + dM + " " + Mes + " " + dS + " " + "\\" +fitxerc +  "\" >> " + "\"" + ubicacio + "crontask" + "\"" # Generem l'string
-        # os.system(stri)
-        # print stri
-        print(ubicacio)
         cron = subprocess.Popen("crontab " + ubicacio + "/crontask", shell=True, stdout=PIPE,
                                 stderr=PIPE)  # Obtenim nom d'usuari
         out, err = cron.communicate()
         if err:
-            tkMessageBox.showerror(title="Error",
-                                   message="Format incorrecte de crontab: m correspon al minut en què es va a executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la mitjanit.diu fa referència al dia del mes, per exemple es pot especificar 15 si es vol executar cada dia 15 dow significa el dia de la setmana, pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
+            messagebox.showerror(title="Error",
+                                 message="Format incorrecte de crontab: m correspon al minut en què es va a "
+                                         "executar el script, el valor va de 0 a 59h l'hora exacta, es maneja el "
+                                         "format de 24 hores, els valors van de 0 a 23, sent 0 les 12:00 de la "
+                                         "mitjanit.diu fa referència al dia del mes, per exemple es pot especificar "
+                                         "15 si es vol executar cada dia 15 dow significa el dia de la setmana, "
+                                         "pot ser numèric (0 a 7, on 0 i 7 són diumenge) o les 3 primeres lletres "
+                                         "del dia en anglès: mon, tue, wed, thu, fri, sat, sun.")
     else:
-        tkMessageBox.showerror(title="Falten dades",
-                               message="Emplena tots els camps de l'esquerra")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-    """except IOError:
-        tkMessageBox.showerror(title="Error en els segons.", message="Trieu un número vàlid de segons i major que 0.")  # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
-"""
+        # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
+        messagebox.showerror(title="Falten dades", message="Emplena tots els camps de l'esquerra")
 
 
-def Sortir():
+def close_window():
     mainw.quit()
 
 
+# MAIN
+# Paràmetres de finestra principal
 mainw = Tk()
 mainw.title("Execució d'Scripts en el temps")
 
@@ -287,13 +292,14 @@ directori = 0  # 0 si no s'ha carregat, directori de treball actual si s'ha carr
 nomf = 0  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
 stdouttxt = ""  # String amb stdout
 stderrtxt = ""  # String amb stderr
+
 # Elements main window
 # {
 f1 = Frame(mainw, bg="grey")  # Creem primer frame, li donem el color gris
 f1.pack(fill=X, side=TOP)  # aliniem a la part de dalt i li permetem expandir-se en X
 
 b1 = Button(f1, text='Escollir directori de treball',
-            command=EscullDirectori)  # Creem el botó i li assignem la comanda de preguntar el directori
+            command=choose_working_directory)  # Creem el botó i li assignem la comanda de preguntar el directori
 b1.pack(side=LEFT)  # l'apilem a l'esquerra
 
 l1 = Label(f1, text="")  # "label" que mostra el directori actual
@@ -305,16 +311,16 @@ f2.pack(side=TOP, fill=X)  # aliniem a la part de dalt i li permetem expandir-se
 # {
 
 
-b2 = Button(f2, text="Obrir Script", command=ObrirScript)  # botó per a obrir script
+b2 = Button(f2, text="Obrir Script", command=open_script)  # botó per a obrir script
 b2.pack(side=LEFT)  # l'apilem a l'esquerra
 
 e1 = Entry(f2, width=20)  # entrada de text per a posar el nom del fitxer
 e1.pack(expand=TRUE, fill=X, side=LEFT)  # li permetem expandir-se en X i l'apilem a l'esquerra
 
-b3 = Button(f2, text="Guardar l'Script", command=GuardarScript)  # Botó per a dur a terme la funció de guardat
+b3 = Button(f2, text="Guardar l'Script", command=save_script)  # Botó per a dur a terme la funció de guardat
 b3.pack(side=RIGHT)  # L'apilem a la dreta
 
-b4 = Button(mainw, text="Guardar en un nou script", command=GuardarNouScript)  # Botó per a generar la funció de dalt
+b4 = Button(mainw, text="Guardar en un nou script", command=save_new_script)  # Botó per a generar la funció de dalt
 b4.pack(side=TOP, anchor=W)  # l'apilem a la part de dalt del frame on ens trobem
 # }
 # {
@@ -360,17 +366,17 @@ cb2.pack(side=LEFT)
 f4 = Frame(mainw)  # afegim un nou frame
 f4.pack(side=TOP, fill=X)  # l'apilem cap a dalt i emplenem en X
 
-b5 = Button(f4, text="Veure Stderr", command=VeureStderr)  # Botó que executa la funció de dalt
+b5 = Button(f4, text="Veure Stderr", command=see_stderr)  # Botó que executa la funció de dalt
 b5.pack(side=RIGHT)  # Ho apilem a la part dreta
 
-b6 = Button(f4, text="Veure Stdout", command=VeureStdout)  # Botó que executa la funció de dalt.
+b6 = Button(f4, text="Veure Stdout", command=see_stdout)  # Botó que executa la funció de dalt.
 b6.pack(side=RIGHT)  # Apilem a la dreta
 # }
 # {
 f5 = Frame(mainw)  # Afegim un nou frame
 f5.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió
 
-b5 = Button(f5, text="Run", command=RunNow)  # Executa la funció de dalt
+b5 = Button(f5, text="Run", command=run_now)  # Executa la funció de dalt
 b5.pack(side=RIGHT)  # apilem a la dreta
 
 l3 = Label(f5, text="Executa immediatament")  # label de descripció del botó b5
@@ -380,7 +386,7 @@ l3.pack(side=RIGHT)
 f6 = Frame(mainw)  # Afegim un nou frame. Aquest frame implementa tot el relacionat amb executar a n determinat temps
 f6.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió X
 
-b6 = Button(f6, text="RunLate", command=RunLate)  # Executa la funció de dalt
+b6 = Button(f6, text="RunLate", command=run_late)  # Executa la funció de dalt
 b6.pack(side=RIGHT)  # Apilem a la dreta
 
 l4 = Label(f6, text="  segons. ")  # label de text
@@ -396,7 +402,7 @@ l6.pack(side=RIGHT)  # Apilem a la dreta
 f9 = Frame(mainw)  # Frame de la part opcional de executa amb format at, per això no segueix la numeració
 f9.pack(side=TOP, fill=X)
 
-b9 = Button(f9, text="RunAt", command=RunAt)  # Botó per a executar la funció anterior
+b9 = Button(f9, text="RunAt", command=run_at)  # Botó per a executar la funció anterior
 b9.pack(side=RIGHT)  # Apilem a la dreta
 
 l10 = Label(f9, text="  de 'at'   ")  # label
@@ -412,7 +418,7 @@ l11.pack(side=RIGHT)  # Apilem a la dreta
 f7 = Frame(mainw)  # Afegim un frame. Aquest contindrà els botons per a executar l'script periodicament
 f7.pack(side=TOP, fill=X)  # ho posem a la paret nort i expandim en x
 
-b7 = Button(f7, text="RunPeriod", command=RunPeriod)  # Botó per a executar la funció anterior
+b7 = Button(f7, text="RunPeriod", command=run_with_period)  # Botó per a executar la funció anterior
 b7.pack(side=RIGHT)  # Apilem a la dreta
 
 l7 = Label(f7, text=" crontab  ")  # label de text informatiu
@@ -461,8 +467,7 @@ l17.pack(side=RIGHT)  # Apilem a la dreta
 f8 = Frame(mainw)  # frame per al botó de sortida
 f8.pack(side=TOP, fill=X)  # Apilem a la esquerra i permetem l'expansió X
 
-
-b8 = Button(f8, text="Sortir", command=Sortir)  # Si apretem aquest botó tanquem la finestra
+b8 = Button(f8, text="Sortir", command=close_window)  # Si apretem aquest botó tanquem la finestra
 b8.pack(side=LEFT)  # Apilem a la esquerra
 # }
 mainw.mainloop()
