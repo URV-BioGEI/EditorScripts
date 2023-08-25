@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from tkinter import messagebox as tkMessageBox  # Per a mostrar els dialegs
+import inspect
+import os  # Importem el modul del sistema per a utilitzar comandes de la shell
+import random
+import subprocess
+from subprocess import PIPE
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
+from tkinter import messagebox as tkMessageBox  # Per a mostrar els dialegs
 from tkinter import scrolledtext as tkst
-import os  # Importem el modul del sistema per a utilitzar comandes de la shell
-import subprocess
-from subprocess import Popen, PIPE
-import sys
-import time
-import random
-import inspect
 
 
 # MAIN
@@ -276,6 +274,10 @@ def RunPeriod():
 """
 
 
+def Sortir():
+    mainw.quit()
+
+
 mainw = Tk()
 mainw.title("Execució d'Scripts en el temps")
 
@@ -458,10 +460,6 @@ l17.pack(side=RIGHT)  # Apilem a la dreta
 # 4
 f8 = Frame(mainw)  # frame per al botó de sortida
 f8.pack(side=TOP, fill=X)  # Apilem a la esquerra i permetem l'expansió X
-
-
-def Sortir():
-    mainw.quit()
 
 
 b8 = Button(f8, text="Sortir", command=Sortir)  # Si apretem aquest botó tanquem la finestra
