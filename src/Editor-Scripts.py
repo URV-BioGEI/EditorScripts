@@ -210,6 +210,7 @@ class EditorScripts:
         self.b8 = Button(self.f8, text="Sortir", command=self.close_window)  # Si premem aquest botó tanquem la finestra
         self.b8.pack(side=LEFT)  # Apilem a l'esquerra
         # }
+        
         self.main_window.mainloop()
 
     def choose_working_directory(self):
@@ -345,10 +346,9 @@ class EditorScripts:
         :return:
         """
         try:
-            rnd = random.randrange(10000)
             segons = int(self.e4.get())
             if segons > 0:
-                location = "/tmp/" + str(rnd) + "Late.sh"
+                location = "/tmp/" + str(random.randrange(10000)) + "Late.sh"
                 # Obtenim els arguments (executar script i passar arguments)
                 arguments = "sleep " + str(segons) + " && " + location + " " + self.e2.get()
                 com = self.st.get(1.0, END)  # Obtenim el text del fitxer
@@ -373,7 +373,6 @@ class EditorScripts:
         """
         try:
             err = None
-            rnd = random.randrange(10000)
             commands = self.e7.get()
             if not commands:
                 # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
@@ -387,7 +386,7 @@ class EditorScripts:
                             inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
                 else:
                     location = self.directori + "/"
-                fitxer = location + str(rnd) + "At.sh"
+                fitxer = location + str(random.randrange(10000)) + "At.sh"
                 # Obtenim els arguments (executar script i passar arguments)
                 arguments = "at " + commands + " -f " + "\"" + fitxer + "\"" + self.e2.get() + ""
                 com = self.st.get(1.0, END)  # Obtenim el text del fitxer
@@ -412,14 +411,13 @@ class EditorScripts:
         indicar el temps en què s’ha d’executar l’script. (format * * * * *).
         :return:
         """
-        rnd = random.randrange(10000)
         com = self.st.get(1.0, END)  # Obtenim el text del fitxer
         if self.directori == "":
             location = os.path.dirname(os.path.abspath(
                 inspect.getfile(inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
         else:
             location = self.directori
-        fitxer = location + str(rnd) + "Period.sh"
+        fitxer = location + str(random.randrange(10000)) + "Period.sh"
         # Obtenir informació
         correcte = 1  # Flag per entrar a la funció (comprova que tot estigui bé)
         ds = self.e5.get()  # Obtenim el camp dS
