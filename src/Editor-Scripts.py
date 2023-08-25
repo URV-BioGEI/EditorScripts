@@ -11,6 +11,204 @@ from tkinter import Button, Frame, Label, Entry, Tk, IntVar, Checkbutton, filedi
 from MyDialog import MyDialog
 
 
+class EditorScripts:
+
+    def __init__(self):
+        # MAIN
+        # Paràmetres de finestra principal
+        main_window = Tk()
+        main_window.title("Execució d'Scripts en el temps")
+
+        # Var
+        file = 0  # 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
+        directori = ""  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
+        file_name = ""  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
+        stdout_txt = ""  # String amb stdout
+        stderr_txt = ""  # String amb stderr
+
+        # Elements main window
+        # {
+        f1 = Frame(main_window, bg="grey")  # Creem primer frame, li donem el color gris
+        f1.pack(fill=X, side=TOP)  # alineem a la part de dalt i li permetem expandir-se en X
+
+        b1 = Button(f1, text='Escollir directori de treball',
+                    command=choose_working_directory)  # Creem el botó i li assignem la comanda de preguntar el directori
+        b1.pack(side=LEFT)  # l'apilem a l'esquerra
+
+        l1 = Label(f1, text="")  # "label" que mostra el directori actual
+        l1.pack(expand=TRUE, fill=X, side=RIGHT,
+                anchor=W)  # Li permeten expandir-se al llarg de la finestra en X, l'apilem a la dreta
+        # }
+        f2 = Frame(main_window)  # Creem primer frame,
+        f2.pack(side=TOP, fill=X)  # alineem a la part de dalt i li permetem expandir-se
+        # {
+
+        b2 = Button(f2, text="Obrir Script", command=open_script)  # botó per a obrir script
+        b2.pack(side=LEFT)  # l'apilem a l'esquerra
+
+        e1 = Entry(f2, width=20)  # entrada de text per a posar el nom del fitxer
+        e1.pack(expand=TRUE, fill=X, side=LEFT)  # li permetem expandir-se en X i l'apilem a l'esquerra
+
+        b3 = Button(f2, text="Guardar l'Script", command=save_script)  # Botó per a dur a terme la funció de guardat
+        b3.pack(side=RIGHT)  # L'apilem a la dreta
+
+        # Botó per a generar la funció de dalt
+        b4 = Button(main_window, text="Guardar en un nou script", command=save_new_script)
+        b4.pack(side=TOP, anchor=W)  # l'apilem a la part de dalt del frame on ens trobem
+        # }
+        # {
+        # És una de les components principal del programa.
+        # Està fet de tres objectes, un TextBox, un ScrollBar i un frame que els conté
+        # D'aquesta manera és com si fos un contenidor ja implementat amb els seus propis mètodes
+        st = tkst.ScrolledText(
+            master=main_window,  # incloem a la finestra principal aquest objecte
+            wrap='word',  # Fem que el text sigui de paraules (?)
+            width=25,  # caràcters per fila
+            height=17,  # lines de text
+            bg='beige'  # color de fons
+        )
+
+        st.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8,
+                pady=8)  # Apilem i permetem l'expansió. Els altres valors són la mida del text (?)
+        # }
+        # {
+        f3 = Frame(main_window)  # tercer frame
+        f3.pack(side=TOP, fill=X)  # procedim igual que els anteriors
+
+        l2 = Label(f3, text="Arguments d'entrada :")  # creem el label que indica els arguments d'entrada.
+        l2.pack(side=LEFT)  # apilem a l'esquerra
+
+        e2 = Entry(f3)  # entrada de text per als arguments
+        e2.pack(expand=TRUE, fill=X, side=LEFT)  # l'apilem i li permeten fer-se gran
+
+        # Permet reencaminar la sortida de l'execució de l’script a un fitxer.
+        # El nom d’aquest fitxer serà en nom de l’script amb extensió «.out»
+        # Sera consultat per tots els botons run
+        std1 = IntVar()
+        cb1 = Checkbutton(f3, text="Genera Stdout",
+                          variable=std1)  # checkbox per a saber si cal generar stdout en un fitxer
+        cb1.pack(side=LEFT)
+
+        # Permet reencaminar la sortida d’error de l'execució de l’script a un
+        # fitxer. El nom d’aquest fitxer serà en nom de l’script amb extensió err.
+        # Sera consultat per tots els botons run
+        std2 = IntVar()
+        cb2 = Checkbutton(f3, text="Genera Stderr",
+                          variable=std2)  # checkbox per a saber si cal generar stderr en un fitxer
+        cb2.pack(side=LEFT)
+        # }
+        # {
+        f4 = Frame(main_window)  # afegim un nou frame
+        f4.pack(side=TOP, fill=X)  # l'apilem cap a dalt i emplenem en X
+
+        b5 = Button(f4, text="Veure Stderr", command=see_stderr)  # Botó que executa la funció de dalt
+        b5.pack(side=RIGHT)  # Ho apilem a la part dreta
+
+        b6 = Button(f4, text="Veure Stdout", command=see_stdout)  # Botó que executa la funció de dalt.
+        b6.pack(side=RIGHT)  # Apilem a la dreta
+        # }
+        # {
+        f5 = Frame(main_window)  # Afegim un nou frame
+        f5.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió
+
+        b5 = Button(f5, text="Run", command=run_now)  # Executa la funció de dalt
+        b5.pack(side=RIGHT)  # apilem a la dreta
+
+        l3 = Label(f5, text="Executa immediatament")  # label de descripció del botó b5
+        l3.pack(side=RIGHT)
+        # }
+        # {
+        # Afegim un nou frame. Aquest frame implementa tot el relacionat amb executar a n determinat temps
+        f6 = Frame(main_window)
+        f6.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió X
+
+        b6 = Button(f6, text="RunLate", command=run_late)  # Executa la funció de dalt
+        b6.pack(side=RIGHT)  # Apilem a la dreta
+
+        l4 = Label(f6, text="  segons. ")  # label de text
+        l4.pack(side=RIGHT)  # Apilem a la dreta
+
+        e4 = Entry(f6, width=3)  # entrada de text per a les hores de la funció run late
+        e4.pack(side=RIGHT)  # Apilem a la dreta
+
+        l6 = Label(f6, text="Executa d'aquí a: ")  # label
+        l6.pack(side=RIGHT)  # Apilem a la dreta
+        # }
+        # {
+        f9 = Frame(main_window)  # Frame de la part opcional d'executar amb format at, per això no segueix la numeració
+        f9.pack(side=TOP, fill=X)
+
+        b9 = Button(f9, text="RunAt", command=run_at)  # Botó per a executar la funció anterior
+        b9.pack(side=RIGHT)  # Apilem a la dreta
+
+        l10 = Label(f9, text="  de 'at'   ")  # label
+        l10.pack(side=RIGHT)  # Apilem a la dreta
+
+        e7 = Entry(f9, width=7)  # entrada de text que correspon a les hores
+        e7.pack(side=RIGHT)  # Apilem a la dreta
+
+        l11 = Label(f9, text="Executa un cop amb format ")  # label
+        l11.pack(side=RIGHT)  # Apilem a la dreta
+        # }
+        # {
+        f7 = Frame(main_window)  # Afegim un frame. Aquest contindrà els botons per a executar l'script periòdicament
+        f7.pack(side=TOP, fill=X)  # ho posem a la paret nort i expandim en x
+
+        b7 = Button(f7, text="RunPeriod", command=run_with_period)  # Botó per a executar la funció anterior
+        b7.pack(side=RIGHT)  # Apilem a la dreta
+
+        l7 = Label(f7, text=" crontab  ")  # label de text informatiu
+        l7.pack(side=RIGHT)  # Apilem a la dreta
+
+        e5 = Entry(f7, width=2)  # entrada de text dS
+        e5.pack(side=RIGHT)  # Apilem a la dreta
+
+        e6 = Entry(f7, width=2)  # entrada de text Mes
+        e6.pack(side=RIGHT)  # Apilem a la dreta
+
+        e8 = Entry(f7, width=2)  # entrada de text dM
+        e8.pack(side=RIGHT)  # Apilem a la dreta
+
+        e9 = Entry(f7, width=2)  # entrada de text hh
+        e9.pack(side=RIGHT)  # Apilem a la dreta
+
+        e10 = Entry(f7, width=2)  # entrada de text mm
+        e10.pack(side=RIGHT)  # Apilem a la dreta
+
+        l9 = Label(f7, text="Programa cada dia amb format")  # label de text informatiu
+        l9.pack(side=RIGHT)  # Apilem a la dreta
+        # }
+        # {
+        f10 = Frame(main_window)  # frame per als labels del camp de crontab
+        f10.pack(side=TOP, fill=X)  # Apilem a l'esquerra i permetem l'expansió X
+
+        l12 = Label(f10, text="                           ")  # label de text informatiu
+        l12.pack(side=RIGHT)  # Apilem a la dreta
+
+        l13 = Label(f10, text="dS")  # label de text informatiu
+        l13.pack(side=RIGHT)  # Apilem a la dreta
+
+        l14 = Label(f10, text="Mes")  # label de text informatiu
+        l14.pack(side=RIGHT)  # Apilem a la dreta
+
+        l15 = Label(f10, text="dM")  # label de text informatiu
+        l15.pack(side=RIGHT)  # Apilem a la dreta
+
+        l16 = Label(f10, text="hh")  # label de text informatiu
+        l16.pack(side=RIGHT)  # Apilem a la dreta
+
+        l17 = Label(f10, text="mm")  # label de text informatiu
+        l17.pack(side=RIGHT)  # Apilem a la dreta
+        # 4
+        f8 = Frame(main_window)  # frame per al botó de sortida
+        f8.pack(side=TOP, fill=X)  # Apilem a l'esquerra i permetem l'expansió X
+
+        b8 = Button(f8, text="Sortir", command=close_window)  # Si premem aquest botó tanquem la finestra
+        b8.pack(side=LEFT)  # Apilem a l'esquerra
+        # }
+        main_window.mainloop()
+
+
 def choose_working_directory():
     global directori
     directori = filedialog.askdirectory(
@@ -281,195 +479,3 @@ def close_window():
     main_window.quit()
 
 
-# MAIN
-# Paràmetres de finestra principal
-main_window = Tk()
-main_window.title("Execució d'Scripts en el temps")
-
-# Var
-file = 0  # 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
-directori = ""  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
-file_name = ""  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
-stdout_txt = ""  # String amb stdout
-stderr_txt = ""  # String amb stderr
-
-# Elements main window
-# {
-f1 = Frame(main_window, bg="grey")  # Creem primer frame, li donem el color gris
-f1.pack(fill=X, side=TOP)  # alineem a la part de dalt i li permetem expandir-se en X
-
-b1 = Button(f1, text='Escollir directori de treball',
-            command=choose_working_directory)  # Creem el botó i li assignem la comanda de preguntar el directori
-b1.pack(side=LEFT)  # l'apilem a l'esquerra
-
-l1 = Label(f1, text="")  # "label" que mostra el directori actual
-l1.pack(expand=TRUE, fill=X, side=RIGHT,
-        anchor=W)  # Li permeten expandir-se al llarg de la finestra en X, l'apilem a la dreta
-# }
-f2 = Frame(main_window)  # Creem primer frame,
-f2.pack(side=TOP, fill=X)  # alineem a la part de dalt i li permetem expandir-se
-# {
-
-
-b2 = Button(f2, text="Obrir Script", command=open_script)  # botó per a obrir script
-b2.pack(side=LEFT)  # l'apilem a l'esquerra
-
-e1 = Entry(f2, width=20)  # entrada de text per a posar el nom del fitxer
-e1.pack(expand=TRUE, fill=X, side=LEFT)  # li permetem expandir-se en X i l'apilem a l'esquerra
-
-b3 = Button(f2, text="Guardar l'Script", command=save_script)  # Botó per a dur a terme la funció de guardat
-b3.pack(side=RIGHT)  # L'apilem a la dreta
-
-# Botó per a generar la funció de dalt
-b4 = Button(main_window, text="Guardar en un nou script", command=save_new_script)
-b4.pack(side=TOP, anchor=W)  # l'apilem a la part de dalt del frame on ens trobem
-# }
-# {
-# És una de les components principal del programa.
-# Està fet de tres objectes, un TextBox, un ScrollBar i un frame que els conté
-# D'aquesta manera és com si fos un contenidor ja implementat amb els seus propis mètodes
-st = tkst.ScrolledText(
-    master=main_window,  # incloem a la finestra principal aquest objecte
-    wrap='word',  # Fem que el text sigui de paraules (?)
-    width=25,  # caràcters per fila
-    height=17,  # lines de text
-    bg='beige'  # color de fons
-)
-
-st.pack(expand=TRUE, fill=BOTH, side=TOP, padx=8,
-        pady=8)  # Apilem i permetem l'expansió. Els altres valors són la mida del text (?)
-# }
-# {
-f3 = Frame(main_window)  # tercer frame
-f3.pack(side=TOP, fill=X)  # procedim igual que els anteriors
-
-l2 = Label(f3, text="Arguments d'entrada :")  # creem el label que indica els arguments d'entrada.
-l2.pack(side=LEFT)  # apilem a l'esquerra
-
-e2 = Entry(f3)  # entrada de text per als arguments
-e2.pack(expand=TRUE, fill=X, side=LEFT)  # l'apilem i li permeten fer-se gran
-
-# Permet reencaminar la sortida de l'execució de l’script a un fitxer.
-# El nom d’aquest fitxer serà en nom de l’script amb extensió «.out»
-# Sera consultat per tots els botons run
-std1 = IntVar()
-cb1 = Checkbutton(f3, text="Genera Stdout", variable=std1)  # checkbox per a saber si cal generar stdout en un fitxer
-cb1.pack(side=LEFT)
-
-# Permet reencaminar la sortida d’error de l'execució de l’script a un
-# fitxer. El nom d’aquest fitxer serà en nom de l’script amb extensió err.
-# Sera consultat per tots els botons run
-std2 = IntVar()
-cb2 = Checkbutton(f3, text="Genera Stderr", variable=std2)  # checkbox per a saber si cal generar stderr en un fitxer
-cb2.pack(side=LEFT)
-# }
-# {
-f4 = Frame(main_window)  # afegim un nou frame
-f4.pack(side=TOP, fill=X)  # l'apilem cap a dalt i emplenem en X
-
-b5 = Button(f4, text="Veure Stderr", command=see_stderr)  # Botó que executa la funció de dalt
-b5.pack(side=RIGHT)  # Ho apilem a la part dreta
-
-b6 = Button(f4, text="Veure Stdout", command=see_stdout)  # Botó que executa la funció de dalt.
-b6.pack(side=RIGHT)  # Apilem a la dreta
-# }
-# {
-f5 = Frame(main_window)  # Afegim un nou frame
-f5.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió
-
-b5 = Button(f5, text="Run", command=run_now)  # Executa la funció de dalt
-b5.pack(side=RIGHT)  # apilem a la dreta
-
-l3 = Label(f5, text="Executa immediatament")  # label de descripció del botó b5
-l3.pack(side=RIGHT)
-# }
-# {
-# Afegim un nou frame. Aquest frame implementa tot el relacionat amb executar a n determinat temps
-f6 = Frame(main_window)
-f6.pack(side=TOP, fill=X)  # apilem a dalt i permetem l'expansió X
-
-b6 = Button(f6, text="RunLate", command=run_late)  # Executa la funció de dalt
-b6.pack(side=RIGHT)  # Apilem a la dreta
-
-l4 = Label(f6, text="  segons. ")  # label de text
-l4.pack(side=RIGHT)  # Apilem a la dreta
-
-e4 = Entry(f6, width=3)  # entrada de text per a les hores de la funció run late
-e4.pack(side=RIGHT)  # Apilem a la dreta
-
-l6 = Label(f6, text="Executa d'aquí a: ")  # label
-l6.pack(side=RIGHT)  # Apilem a la dreta
-# }
-# {
-f9 = Frame(main_window)  # Frame de la part opcional d'executar amb format at, per això no segueix la numeració
-f9.pack(side=TOP, fill=X)
-
-b9 = Button(f9, text="RunAt", command=run_at)  # Botó per a executar la funció anterior
-b9.pack(side=RIGHT)  # Apilem a la dreta
-
-l10 = Label(f9, text="  de 'at'   ")  # label
-l10.pack(side=RIGHT)  # Apilem a la dreta
-
-e7 = Entry(f9, width=7)  # entrada de text que correspon a les hores
-e7.pack(side=RIGHT)  # Apilem a la dreta
-
-l11 = Label(f9, text="Executa un cop amb format ")  # label
-l11.pack(side=RIGHT)  # Apilem a la dreta
-# }
-# {
-f7 = Frame(main_window)  # Afegim un frame. Aquest contindrà els botons per a executar l'script periòdicament
-f7.pack(side=TOP, fill=X)  # ho posem a la paret nort i expandim en x
-
-b7 = Button(f7, text="RunPeriod", command=run_with_period)  # Botó per a executar la funció anterior
-b7.pack(side=RIGHT)  # Apilem a la dreta
-
-l7 = Label(f7, text=" crontab  ")  # label de text informatiu
-l7.pack(side=RIGHT)  # Apilem a la dreta
-
-e5 = Entry(f7, width=2)  # entrada de text dS
-e5.pack(side=RIGHT)  # Apilem a la dreta
-
-e6 = Entry(f7, width=2)  # entrada de text Mes
-e6.pack(side=RIGHT)  # Apilem a la dreta
-
-e8 = Entry(f7, width=2)  # entrada de text dM
-e8.pack(side=RIGHT)  # Apilem a la dreta
-
-e9 = Entry(f7, width=2)  # entrada de text hh
-e9.pack(side=RIGHT)  # Apilem a la dreta
-
-e10 = Entry(f7, width=2)  # entrada de text mm
-e10.pack(side=RIGHT)  # Apilem a la dreta
-
-l9 = Label(f7, text="Programa cada dia amb format")  # label de text informatiu
-l9.pack(side=RIGHT)  # Apilem a la dreta
-# }
-# {
-f10 = Frame(main_window)  # frame per als labels del camp de crontab
-f10.pack(side=TOP, fill=X)  # Apilem a l'esquerra i permetem l'expansió X
-
-l12 = Label(f10, text="                           ")  # label de text informatiu
-l12.pack(side=RIGHT)  # Apilem a la dreta
-
-l13 = Label(f10, text="dS")  # label de text informatiu
-l13.pack(side=RIGHT)  # Apilem a la dreta
-
-l14 = Label(f10, text="Mes")  # label de text informatiu
-l14.pack(side=RIGHT)  # Apilem a la dreta
-
-l15 = Label(f10, text="dM")  # label de text informatiu
-l15.pack(side=RIGHT)  # Apilem a la dreta
-
-l16 = Label(f10, text="hh")  # label de text informatiu
-l16.pack(side=RIGHT)  # Apilem a la dreta
-
-l17 = Label(f10, text="mm")  # label de text informatiu
-l17.pack(side=RIGHT)  # Apilem a la dreta
-# 4
-f8 = Frame(main_window)  # frame per al botó de sortida
-f8.pack(side=TOP, fill=X)  # Apilem a l'esquerra i permetem l'expansió X
-
-b8 = Button(f8, text="Sortir", command=close_window)  # Si premem aquest botó tanquem la finestra
-b8.pack(side=LEFT)  # Apilem a l'esquerra
-# }
-main_window.mainloop()
