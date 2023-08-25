@@ -156,6 +156,12 @@ _Below is an example of how you can instruct your audience on installing and set
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+It seems that tk has to be installed as a standard library from the system
+```shell
+# https://stackoverflow.com/questions/25905540/importerror-no-module-named-tkinter
+sudo apt-get install -y python3-tk
+```
+
 ```shell
 python3 -m venv venv
 /home/aleixmt/Desktop/EditorScripts/venv/bin/python3 -m pip install -r /home/aleixmt/Desktop/EditorScripts/requirements.txt
