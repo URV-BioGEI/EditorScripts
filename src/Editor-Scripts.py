@@ -11,6 +11,7 @@ from tkinter import messagebox  # Per a mostrar els diàlegs
 from tkinter import scrolledtext as tkst
 from MyDialog import MyDialog
 
+
 def choose_working_directory():
     global directori
     directori = filedialog.askdirectory(
@@ -101,7 +102,6 @@ def see_stdout():
     Crea una subfinestra per a visualitzar si existeix la sortida de la darrera execució de l’script.
     :return:
     """
-    # global stout
     d = MyDialog(mainw, stdouttxt)
     mainw.wait_window(d.top)
 
@@ -127,22 +127,22 @@ def run_now():
     stdouttxt, stderrtxt = rc.communicate()  # Obtenim les sortides
     # Part dels checkboxes
     if std1.get():  # Si l'usuari ha marcat el checkbox del stdout...
-        if nomf != 0:  # Si s'ha obert un fitxer
+        if nomf != "":  # Si s'ha obert un fitxer
             f = open(nomf + ".out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stdouttxt)  # Hi escrivim la sortida
+            f.write(stdouttxt.decode("utf-8"))  # Hi escrivim la sortida
             f.close()  # Tanquem
         else:  # Sino li donem un altre nom
             f = open("script.out", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stdouttxt)  # Hi escrivim la sortida
+            f.write(stdouttxt.decode("utf-8"))  # Hi escrivim la sortida
             f.close()  # Tanquem
     if std2.get():  # Si l'usuari ha marcat el checkbox del stderr...
-        if nomf != 0:  # Si s'ha obert un fitxer
+        if nomf != "":  # Si s'ha obert un fitxer
             f = open(nomf + ".err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stderrtxt)  # Hi escrivim la sortida
+            f.write(stderrtxt.decode("utf-8"))  # Hi escrivim la sortida
             f.close()  # Tanquem
         else:  # Sino li donem un altre nom
             f = open("script.err", 'w+')  # Obrim el fitxer en mode w+, per a fer el clean.
-            f.write(stderrtxt)  # Hi escrivim la sortida
+            f.write(stderrtxt.decode("utf-8"))  # Hi escrivim la sortida
             f.close()  # Tanquem
 
 
@@ -192,7 +192,7 @@ def run_at():
                                  message="Introduiu una comanda AT Vàlida. Tingueu en compte que l'String \"At \" "
                                          "ja s'afegeix automàticament.")
         else:
-            if directori == 0:
+            if directori == "":
                 ubicacio = os.path.dirname(os.path.abspath(
                     inspect.getfile(inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
             else:
@@ -208,7 +208,7 @@ def run_at():
             rc = subprocess.Popen(arguments, shell=True, stdout=PIPE, stderr=PIPE)
             out, err = rc.communicate()
         if err:
-            messagebox.showerror(title="Error", message=err)
+            messagebox.showerror(title="Error", message=err.decode("utf-8"))
     except IOError:
         # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         messagebox.showerror(title="Error en els segons.",
@@ -227,7 +227,7 @@ def run_with_period():
     global st, file
     rnd = random.randrange(10000)
     com = st.get(1.0, END)  # Obtenim el text del fitxer
-    if directori == 0:
+    if directori == "":
         ubicacio = os.path.dirname(os.path.abspath(
             inspect.getfile(inspect.currentframe()))) + "/"  # Assignem la ubicació del fitxer temporal script
     else:
@@ -288,8 +288,8 @@ mainw.title("Execució d'Scripts en el temps")
 
 # Var
 file = 0  # 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
-directori = 0  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
-nomf = 0  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
+directori = ""  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
+nomf = ""  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
 stdouttxt = ""  # String amb stdout
 stderrtxt = ""  # String amb stderr
 
