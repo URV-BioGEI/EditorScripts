@@ -16,15 +16,15 @@ class EditorScripts:
     def __init__(self):
         # MAIN
         # Paràmetres de finestra principal
-        main_window = Tk()
-        main_window.title("Execució d'Scripts en el temps")
+        self.main_window = Tk()
+        self.main_window.title("Execució d'Scripts en el temps")
 
         # Var
-        file = 0  # 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
-        directori = ""  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
-        file_name = ""  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
-        stdout_txt = ""  # String amb stdout
-        stderr_txt = ""  # String amb stderr
+        self.file = ""  # 0 si no s'ha carregat cap fitxer, ruta al fitxer incloent el nom si ja s'ha carregat
+        self.directori = ""  # 0 si no s'ha carregat, directori de treball actual si s'ha carregat
+        self.file_name = ""  # 0 si no s'ha obert cap fitxer, nom del fitxer obert si s'ha carregat fitxer
+        self.stdout_txt = ""  # String amb stdout
+        self.stderr_txt = ""  # String amb stderr
 
         # Elements main window
         # {
@@ -254,7 +254,7 @@ def save_script():
     Per a executar-se un fitxer ha hagut de ser obert prèviament.
     :return:
     """
-    if file != 0:  # Si el flag no es troba actiu...
+    if file != "":  # Si el flag no es troba actiu...
         try:
             f = open(file, 'w+')  # Obrim el fitxer en mode d'escriptura +, farà clean abans
             text = st.get(1.0, END)  # Obtenim el text del text box
