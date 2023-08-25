@@ -44,7 +44,7 @@ def open_script():
             st.delete(1.0, END)  # Fem un clean del text
             st.insert(END, content)  # inserim el contingut del fitxer
             f.close()  # Tanquem el fitxer
-        except IOError:
+        except Exception:
             messagebox.showerror(title="Error I/O",
                                  message="Error E/S")  # Si captem una excepció E/S, mostrem el missatge
 
@@ -62,7 +62,7 @@ def save_script():
             text = st.get(1.0, END)  # Obtenim el text del text box
             f.write(text)  # Guardem el text al fitxer
             f.close()  # Tanquem fitxer
-        except IOError:
+        except Exception:
             messagebox.showerror(title="Error I/O",
                                  message="Error E/S")  # Si captem una excepció E/S, mostrem el missatge
     else:  # ...Mostrem missatge d'error
@@ -83,7 +83,7 @@ def save_new_script():
             text = st.get(1.0, END)
             f.write(text)
             f.close()
-    except IOError:
+    except Exception:
         messagebox.showerror(title="Error I/O", message="Error E/S")  # Si captem una excepció E/S, mostrem el missatge
 
 
@@ -171,7 +171,7 @@ def run_late():
             # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
             messagebox.showerror(title="Error de temps",
                                  message="Trieu un número vàlid de segons i major que 0.")
-    except IOError:
+    except Exception:
         # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         messagebox.showerror(title="Error de temps",
                              message="Trieu un número vàlid de segons i major que 0.")
@@ -209,7 +209,7 @@ def run_at():
             out, err = rc.communicate()
         if err:
             messagebox.showerror(title="Error", message=err.decode("utf-8"))
-    except IOError:
+    except Exception:
         # Si captem una excepció (que el fitxer no existeixi) mostrem el missatge
         messagebox.showerror(title="Error en els segons.",
                              message="Trieu un número vàlid de segons i major que 0.")
